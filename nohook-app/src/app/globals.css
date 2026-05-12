@@ -27,6 +27,35 @@ body {
   font-family: var(--font-sans);
 }
 
+.phone-map,
+.phone-map .leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #091018;
+}
+
+.phone-map .leaflet-pane,
+.phone-map .leaflet-top,
+.phone-map .leaflet-bottom,
+.phone-map .leaflet-control-container {
+  z-index: 1 !important;
+}
+
+.phone-map .leaflet-tile-pane,
+.phone-map .leaflet-overlay-pane,
+.phone-map .leaflet-marker-pane,
+.phone-map .leaflet-shadow-pane {
+  z-index: 1 !important;
+}
+
+.phone-map .leaflet-tooltip {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(7, 12, 18, 0.82);
+  color: #fff;
+  box-shadow: none;
+}
+
 a,
 button,
 input,

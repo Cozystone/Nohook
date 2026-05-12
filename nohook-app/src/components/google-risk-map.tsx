@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import "leaflet/dist/leaflet.css";
+import type * as LeafletType from "leaflet";
 import { riskPalette } from "@/lib/data";
 import type { CityData, LatLngPoint } from "@/lib/types";
-import type * as LeafletType from "leaflet";
 
 type RiskMapProps = {
   city: CityData;
@@ -12,214 +19,220 @@ type RiskMapProps = {
   onSelectSegment: (id: string) => void;
 };
 
+export type RiskMapHandle = {
+  zoomIn: () => void;
+  zoomOut: () => void;
+};
+
 const FALLBACK_WIDTH = 1280;
 const FALLBACK_HEIGHT = 880;
 
-export function GoogleRiskMap({
-  city,
-  selectedSegmentId,
-  onSelectSegment,
-}: RiskMapProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<LeafletType.Map | null>(null);
-  const segmentLayersRef = useRef<Map<string, LeafletType.Polyline>>(new Map());
-  const markerLayerRef = useRef<LeafletType.LayerGroup | null>(null);
-  const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
-    "loading",
-  );
+export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
+  function GoogleRiskMap({ city, selectedSegmentId, onSelectSegment }, ref) {
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const mapRef = useRef<LeafletType.Map | null>(null);
+    const segmentLayersRef = useRef<Map<string, LeafletType.Polyline>>(new Map());
+    const markerLayerRef = useRef<LeafletType.LayerGroup | null>(null);
+    const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
+      "loading",
+    );
 
-  useEffect(() => {
-    if (!containerRef.current) {
-      return;
-    }
+    useImperativeHandle(ref, () => ({
+      zoomIn() {
+        mapRef.current?.zoomIn();
+      },
+      zoomOut() {
+        mapRef.current?.zoomOut();
+      },
+    }));
 
-    const segmentLayers = segmentLayersRef.current;
-    let map: LeafletType.Map | null = null;
-
-    async function initMap() {
-      const L = await import("leaflet");
-
-      map = L.map(containerRef.current!, {
-        zoomControl: false,
-        attributionControl: false,
-        preferCanvas: true,
-      });
-
-      mapRef.current = map;
-
-      L.control.zoom({ position: "topright" }).addTo(map);
-
-      const imageryLayer = L.tileLayer(
-        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        {
-          maxZoom: 19,
-          crossOrigin: true,
-        },
-      );
-
-      const labelLayer = L.tileLayer(
-        "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-        {
-          maxZoom: 19,
-          opacity: 0.92,
-          crossOrigin: true,
-        },
-      );
-
-      let tileErrors = 0;
-      imageryLayer.on("load", () => setLoadState("ready"));
-      imageryLayer.on("tileerror", () => {
-        tileErrors += 1;
-        if (tileErrors > 4) {
-          setLoadState("error");
-        }
-      });
-
-      imageryLayer.addTo(map);
-      labelLayer.addTo(map);
-
-      setTimeout(() => {
-        map?.invalidateSize();
-      }, 0);
-    }
-
-    initMap();
-
-    return () => {
-      map?.remove();
-      mapRef.current = null;
-      segmentLayers.clear();
-      markerLayerRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!mapRef.current) {
-      return;
-    }
-
-    let cancelled = false;
-
-    async function syncLayers() {
-      const L = await import("leaflet");
-      const leafletMap = mapRef.current;
-
-      if (cancelled || !leafletMap) {
+    useEffect(() => {
+      if (!containerRef.current) {
         return;
       }
 
-      segmentLayersRef.current.forEach((layer) => layer.remove());
-      segmentLayersRef.current.clear();
+      const segmentLayers = segmentLayersRef.current;
+      let map: LeafletType.Map | null = null;
 
-      if (markerLayerRef.current) {
-        markerLayerRef.current.remove();
-      }
+      async function initMap() {
+        const L = await import("leaflet");
 
-      const bounds = L.latLngBounds([]);
+        map = L.map(containerRef.current!, {
+          zoomControl: false,
+          attributionControl: false,
+          preferCanvas: true,
+        });
 
-      city.segments.forEach((segment) => {
-        const isSelected = segment.id === selectedSegmentId;
-        const latLngs = segment.path.map(
-          (point) => [point.lat, point.lng] as LeafletType.LatLngTuple,
+        mapRef.current = map;
+
+        const imageryLayer = L.tileLayer(
+          "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          {
+            maxZoom: 19,
+            crossOrigin: true,
+          },
         );
 
-        const glow = L.polyline(latLngs, {
-          color: "#ffffff",
-          weight: isSelected ? 16 : 12,
-          opacity: 0.14,
-          interactive: false,
-        }).addTo(leafletMap);
-
-        const line = L.polyline(latLngs, {
-          color: riskPalette[segment.riskLevel],
-          weight: isSelected ? 10 : 7,
-          opacity: isSelected ? 1 : 0.88,
-        }).addTo(leafletMap);
-
-        line.on("click", () => onSelectSegment(segment.id));
-        line.on("mouseover", () => {
-          leafletMap.getContainer().style.cursor = "pointer";
-        });
-        line.on("mouseout", () => {
-          leafletMap.getContainer().style.cursor = "";
-        });
-
-        segmentLayersRef.current.set(segment.id, line);
-        segmentLayersRef.current.set(`${segment.id}-glow`, glow);
-        latLngs.forEach((point) => bounds.extend(point));
-      });
-
-      const markerLayer = L.layerGroup();
-
-      city.landmarks.forEach((landmark) => {
-        const marker = L.circleMarker(
-          [landmark.position.lat, landmark.position.lng],
+        const labelLayer = L.tileLayer(
+          "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
           {
-            radius: 5,
-            weight: 2,
-            color: "#0f172a",
-            fillColor: "#f8fafc",
-            fillOpacity: 0.95,
+            maxZoom: 19,
+            opacity: 0.9,
+            crossOrigin: true,
           },
-        ).bindTooltip(landmark.label, {
-          permanent: false,
-          direction: "top",
-          offset: [0, -8],
+        );
+
+        let tileErrors = 0;
+        imageryLayer.on("load", () => setLoadState("ready"));
+        imageryLayer.on("tileerror", () => {
+          tileErrors += 1;
+          if (tileErrors > 4) {
+            setLoadState("error");
+          }
         });
 
-        marker.addTo(markerLayer);
-        bounds.extend([landmark.position.lat, landmark.position.lng]);
-      });
+        imageryLayer.addTo(map);
+        labelLayer.addTo(map);
 
-      markerLayer.addTo(leafletMap);
-      markerLayerRef.current = markerLayer;
-
-      if (bounds.isValid()) {
-        leafletMap.fitBounds(bounds, {
-          padding: [88, 88],
-        });
-      } else {
-        leafletMap.setView([city.mapCenter.lat, city.mapCenter.lng], city.zoom);
+        setTimeout(() => {
+          map?.invalidateSize();
+        }, 0);
       }
-    }
 
-    syncLayers();
+      initMap();
 
-    return () => {
-      cancelled = true;
-    };
-  }, [city, selectedSegmentId, onSelectSegment]);
+      return () => {
+        map?.remove();
+        mapRef.current = null;
+        segmentLayers.clear();
+        markerLayerRef.current = null;
+      };
+    }, []);
 
-  const statusLabel =
-    loadState === "loading"
-      ? "위성 지도를 불러오는 중"
-      : loadState === "error"
-        ? "위성 타일 로딩에 실패해 데모 지도로 전환됨"
-        : "Leaflet 위성 타일 사용 중";
+    useEffect(() => {
+      if (!mapRef.current) {
+        return;
+      }
 
-  return (
-    <div className="absolute inset-0">
-      <div
-        ref={containerRef}
-        className={`absolute inset-0 transition-opacity duration-300 ${
-          loadState === "error" ? "opacity-0" : "opacity-100"
-        }`}
-      />
+      let cancelled = false;
 
-      {loadState === "error" ? (
-        <FallbackSatelliteMap
-          city={city}
-          selectedSegmentId={selectedSegmentId}
-          onSelectSegment={onSelectSegment}
-        />
-      ) : null}
+      async function syncLayers() {
+        const L = await import("leaflet");
+        const leafletMap = mapRef.current;
 
-      <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/65 px-4 py-2 text-xs text-white/90 backdrop-blur-md">
-        {statusLabel}
+        if (cancelled || !leafletMap) {
+          return;
+        }
+
+        segmentLayersRef.current.forEach((layer) => layer.remove());
+        segmentLayersRef.current.clear();
+
+        if (markerLayerRef.current) {
+          markerLayerRef.current.remove();
+        }
+
+        const bounds = L.latLngBounds([]);
+
+        city.segments.forEach((segment) => {
+          const isSelected = segment.id === selectedSegmentId;
+          const latLngs = segment.path.map(
+            (point) => [point.lat, point.lng] as LeafletType.LatLngTuple,
+          );
+
+          const glow = L.polyline(latLngs, {
+            color: "#ffffff",
+            weight: isSelected ? 16 : 12,
+            opacity: 0.14,
+            interactive: false,
+          }).addTo(leafletMap);
+
+          const line = L.polyline(latLngs, {
+            color: riskPalette[segment.riskLevel],
+            weight: isSelected ? 10 : 7,
+            opacity: isSelected ? 1 : 0.88,
+          }).addTo(leafletMap);
+
+          line.on("click", () => onSelectSegment(segment.id));
+          line.on("mouseover", () => {
+            leafletMap.getContainer().style.cursor = "pointer";
+          });
+          line.on("mouseout", () => {
+            leafletMap.getContainer().style.cursor = "";
+          });
+
+          segmentLayersRef.current.set(segment.id, line);
+          segmentLayersRef.current.set(`${segment.id}-glow`, glow);
+          latLngs.forEach((point) => bounds.extend(point));
+        });
+
+        const markerLayer = L.layerGroup();
+
+        city.landmarks.forEach((landmark) => {
+          const marker = L.circleMarker(
+            [landmark.position.lat, landmark.position.lng],
+            {
+              radius: 5,
+              weight: 2,
+              color: "#0f172a",
+              fillColor: "#f8fafc",
+              fillOpacity: 0.95,
+            },
+          ).bindTooltip(landmark.label, {
+            permanent: false,
+            direction: "top",
+            offset: [0, -8],
+          });
+
+          marker.addTo(markerLayer);
+          bounds.extend([landmark.position.lat, landmark.position.lng]);
+        });
+
+        markerLayer.addTo(leafletMap);
+        markerLayerRef.current = markerLayer;
+
+        if (bounds.isValid()) {
+          leafletMap.fitBounds(bounds, {
+            padding: [56, 56],
+          });
+        } else {
+          leafletMap.setView([city.mapCenter.lat, city.mapCenter.lng], city.zoom);
+        }
+      }
+
+      syncLayers();
+
+      return () => {
+        cancelled = true;
+      };
+    }, [city, selectedSegmentId, onSelectSegment]);
+
+    const statusLabel =
+      loadState === "loading"
+        ? "위성 지도를 불러오는 중"
+        : loadState === "error"
+          ? "위성 타일 로딩에 실패해 데모 지도로 전환됨"
+          : "위성 지도 연결됨";
+
+    return (
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div ref={containerRef} className="phone-map absolute inset-0" />
+
+        {loadState === "error" ? (
+          <FallbackSatelliteMap
+            city={city}
+            selectedSegmentId={selectedSegmentId}
+            onSelectSegment={onSelectSegment}
+          />
+        ) : null}
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-[linear-gradient(180deg,rgba(6,10,15,0)_0%,rgba(6,10,15,0.66)_100%)]" />
+        <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/65 px-4 py-2 text-[11px] text-white/90 backdrop-blur-md">
+          {statusLabel}
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  },
+);
 
 function FallbackSatelliteMap({
   city,
@@ -229,7 +242,7 @@ function FallbackSatelliteMap({
   const projected = useMemo(() => projectCity(city), [city]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#10161d]">
+    <div className="absolute inset-0 z-10 overflow-hidden bg-[#10161d]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(79,111,78,0.45),transparent_20%),radial-gradient(circle_at_72%_28%,rgba(96,87,62,0.32),transparent_18%),radial-gradient(circle_at_58%_76%,rgba(58,85,68,0.42),transparent_22%),linear-gradient(180deg,#0d1319_0%,#161f29_100%)]" />
       <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:120px_120px]" />
 
@@ -327,10 +340,6 @@ function FallbackSatelliteMap({
           </g>
         ))}
       </svg>
-
-      <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/55 px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-white/82 backdrop-blur-md">
-        Satellite Demo
-      </div>
     </div>
   );
 }
