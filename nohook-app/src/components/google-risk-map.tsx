@@ -31,7 +31,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
   function GoogleRiskMap({ city, selectedSegmentId, onSelectSegment }, ref) {
     const containerRef = useRef<HTMLDivElement | null>(null);
     const mapRef = useRef<LeafletType.Map | null>(null);
-    const segmentLayersRef = useRef<Map<string, LeafletType.Polyline>>(new Map());
+    const segmentLayersRef = useRef<Map<string, LeafletType.Layer>>(new Map());
     const markerLayerRef = useRef<LeafletType.LayerGroup | null>(null);
     const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
       "loading",
@@ -69,6 +69,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
           {
             maxZoom: 19,
+            opacity: 0.82,
             crossOrigin: true,
           },
         );
@@ -77,7 +78,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
           {
             maxZoom: 19,
-            opacity: 0.9,
+            opacity: 0.85,
             crossOrigin: true,
           },
         );
@@ -140,16 +141,23 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           );
 
           const glow = L.polyline(latLngs, {
-            color: "#ffffff",
-            weight: isSelected ? 16 : 12,
-            opacity: 0.14,
+            color: riskPalette[segment.riskLevel],
+            weight: isSelected ? 22 : 18,
+            opacity: isSelected ? 0.28 : 0.18,
+            interactive: false,
+          }).addTo(leafletMap);
+
+          const underLine = L.polyline(latLngs, {
+            color: "#fff6e4",
+            weight: isSelected ? 10 : 8,
+            opacity: isSelected ? 0.8 : 0.56,
             interactive: false,
           }).addTo(leafletMap);
 
           const line = L.polyline(latLngs, {
             color: riskPalette[segment.riskLevel],
-            weight: isSelected ? 10 : 7,
-            opacity: isSelected ? 1 : 0.88,
+            weight: isSelected ? 7 : 6,
+            opacity: 1,
           }).addTo(leafletMap);
 
           line.on("click", () => onSelectSegment(segment.id));
@@ -160,8 +168,9 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
             leafletMap.getContainer().style.cursor = "";
           });
 
-          segmentLayersRef.current.set(segment.id, line);
           segmentLayersRef.current.set(`${segment.id}-glow`, glow);
+          segmentLayersRef.current.set(`${segment.id}-under`, underLine);
+          segmentLayersRef.current.set(segment.id, line);
           latLngs.forEach((point) => bounds.extend(point));
         });
 
@@ -171,9 +180,9 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           const marker = L.circleMarker(
             [landmark.position.lat, landmark.position.lng],
             {
-              radius: 5,
+              radius: 4,
               weight: 2,
-              color: "#0f172a",
+              color: "#081018",
               fillColor: "#f8fafc",
               fillOpacity: 0.95,
             },
@@ -192,7 +201,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
 
         if (bounds.isValid()) {
           leafletMap.fitBounds(bounds, {
-            padding: [48, 48],
+            padding: [44, 44],
           });
         } else {
           leafletMap.setView([city.mapCenter.lat, city.mapCenter.lng], city.zoom);
@@ -211,11 +220,12 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
         ? "위성 지도를 불러오는 중"
         : loadState === "error"
           ? "위성 타일 로딩 실패, 데모 지도로 전환"
-          : "위성 지도 연결됨";
+          : "호객 위험 도로 색상 표시";
 
     return (
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div ref={containerRef} className="phone-map absolute inset-0" />
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(7,12,18,0.06)_0%,rgba(7,12,18,0.14)_100%)]" />
 
         {loadState === "error" ? (
           <FallbackSatelliteMap
@@ -225,8 +235,8 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           />
         ) : null}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-[linear-gradient(180deg,rgba(6,10,15,0)_0%,rgba(6,10,15,0.62)_100%)]" />
-        <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/65 px-4 py-2 text-[11px] text-white/90 backdrop-blur-md">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-[linear-gradient(180deg,rgba(6,10,15,0)_0%,rgba(6,10,15,0.55)_100%)]" />
+        <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/60 px-4 py-2 text-[11px] text-white/90 backdrop-blur-md">
           {statusLabel}
         </div>
       </div>
@@ -297,20 +307,29 @@ function FallbackSatelliteMap({
               <path
                 d={segment.path}
                 fill="none"
-                stroke="#ffffff"
-                strokeWidth={isSelected ? 18 : 14}
+                stroke={riskPalette[segment.riskLevel]}
+                strokeWidth={isSelected ? 22 : 18}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity="0.12"
+                opacity={isSelected ? 0.3 : 0.18}
+              />
+              <path
+                d={segment.path}
+                fill="none"
+                stroke="#fff6e4"
+                strokeWidth={isSelected ? 10 : 8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={isSelected ? 0.8 : 0.56}
               />
               <path
                 d={segment.path}
                 fill="none"
                 stroke={riskPalette[segment.riskLevel]}
-                strokeWidth={isSelected ? 11 : 8}
+                strokeWidth={isSelected ? 7 : 6}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity={isSelected ? 1 : 0.88}
+                opacity="1"
                 className="cursor-pointer"
                 onClick={() => onSelectSegment(segment.id)}
               />

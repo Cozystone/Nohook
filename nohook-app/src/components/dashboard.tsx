@@ -168,15 +168,15 @@ export function Dashboard({ cities }: DashboardProps) {
               </span>
             </div>
             <h1 className="mt-5 text-3xl font-semibold leading-[1.02] tracking-[-0.06em] text-white xl:text-[3rem]">
-              아이폰 앱처럼
+              지도 위에서
               <br />
-              위험 도로를 먼저
+              호객 많은 거리를
               <br />
-              보여줍니다
+              먼저 봅니다
             </h1>
             <p className="mt-4 text-sm leading-7 text-white/72">
-              지도 위 요소를 줄여서 실제 도로가 먼저 보이도록 정리했습니다.
-              도시 검색은 GeoDB 기반으로 연결되어 있습니다.
+              하단 패널을 줄여 실제 지도가 더 많이 보이도록 정리했습니다.
+              위험 도로는 교통 혼잡선처럼 색으로 표시합니다.
             </p>
             <div className="mt-5 grid grid-cols-3 gap-3">
               <HeroStat label="모니터링" value="6" />
@@ -198,13 +198,13 @@ export function Dashboard({ cities }: DashboardProps) {
             </div>
 
             <div className="relative z-30 px-4">
-              <div className="rounded-[1.45rem] border border-white/10 bg-black/34 px-4 py-3 shadow-[0_16px_36px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+              <div className="rounded-[1.35rem] border border-white/10 bg-black/34 px-4 py-3 shadow-[0_16px_36px_rgba(0,0,0,0.22)] backdrop-blur-xl">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-white/44">
                       Nohook
                     </p>
-                    <h2 className="mt-1 text-[1.45rem] font-semibold tracking-[-0.05em]">
+                    <h2 className="mt-1 text-[1.42rem] font-semibold tracking-[-0.05em]">
                       오늘 걸을 거리
                     </h2>
                   </div>
@@ -299,7 +299,7 @@ export function Dashboard({ cities }: DashboardProps) {
                   onSelectSegment={setSelectedSegmentId}
                 />
 
-                <div className="absolute left-3 top-3 z-30 flex items-center gap-2">
+                <div className="absolute left-3 top-3 z-30 flex flex-wrap items-center gap-2">
                   <span className="rounded-full border border-white/10 bg-black/44 px-3 py-1.5 text-[11px] font-medium text-white/88 backdrop-blur-xl">
                     {activeCity.label}
                   </span>
@@ -310,6 +310,9 @@ export function Dashboard({ cities }: DashboardProps) {
                     }}
                   >
                     {riskLabelMap[selectedSegment.riskLevel]}
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-black/44 px-3 py-1.5 text-[11px] text-white/82 backdrop-blur-xl">
+                    도로 색상 오버레이
                   </span>
                 </div>
 
@@ -325,24 +328,23 @@ export function Dashboard({ cities }: DashboardProps) {
                 </div>
 
                 <div className="absolute inset-x-0 bottom-0 z-30 px-3 pb-3">
-                  <div className="rounded-[1.55rem] border border-white/10 bg-[rgba(7,12,18,0.86)] shadow-[0_20px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl">
-                    <div className="border-b border-white/8 px-4 py-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">
-                            선택 도로
-                          </p>
-                          <p className="mt-1 truncate text-base font-semibold tracking-[-0.03em]">
-                            {selectedSegment.name}
-                          </p>
-                          <p className="mt-1 truncate text-xs text-white/58">
-                            {selectedSegment.summary}
-                          </p>
-                        </div>
-                        <span className="shrink-0 rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[11px] text-white/72">
-                          최근 신고 {selectedSegment.recentReportCount}건
-                        </span>
+                  <div
+                    className={`rounded-[1.45rem] border border-white/10 bg-[rgba(7,12,18,0.84)] shadow-[0_20px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl ${
+                      activeTab === "report" ? "" : "bg-[rgba(7,12,18,0.78)]"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">
+                          선택 도로
+                        </p>
+                        <p className="mt-1 truncate text-[15px] font-semibold tracking-[-0.03em]">
+                          {selectedSegment.name}
+                        </p>
                       </div>
+                      <span className="shrink-0 rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[11px] text-white/72">
+                        최근 신고 {selectedSegment.recentReportCount}건
+                      </span>
                     </div>
 
                     <div className="flex gap-2 px-4 pt-3">
@@ -358,7 +360,11 @@ export function Dashboard({ cities }: DashboardProps) {
                       />
                     </div>
 
-                    <div className="max-h-[24vh] overflow-y-auto px-4 pb-4 pt-3">
+                    <div
+                      className={`overflow-y-auto px-4 pb-4 pt-3 ${
+                        activeTab === "map" ? "max-h-[16vh]" : "max-h-[34vh]"
+                      }`}
+                    >
                       {activeTab === "map" ? (
                         <InsightPanel
                           segment={selectedSegment}
@@ -462,15 +468,15 @@ function InsightPanel({
 }) {
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <InfoMetric label="위험 점수" value={segment.riskScore.toString()} />
-        <InfoMetric label="판단" value={riskCopy[segment.riskLevel]} />
-        <InfoMetric
-          label="최근 신고"
+      <div className="grid grid-cols-4 gap-2">
+        <InfoMetricCompact label="점수" value={segment.riskScore.toString()} />
+        <InfoMetricCompact label="판단" value={riskCopy[segment.riskLevel]} />
+        <InfoMetricCompact
+          label="신고"
           value={`${segment.recentReportCount}건`}
         />
-        <InfoMetric
-          label="주요 유형"
+        <InfoMetricCompact
+          label="유형"
           value={categoryLabelMap[segment.topCategories[0]]}
         />
       </div>
@@ -479,50 +485,39 @@ function InsightPanel({
         {segment.topCategories.map((category) => (
           <span
             key={category}
-            className="rounded-full border border-white/10 bg-white/6 px-3 py-2 text-[11px] text-white/78"
+            className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1.5 text-[10px] text-white/78"
           >
             {categoryLabelMap[category] ?? category}
           </span>
         ))}
       </div>
 
-      <div className="space-y-2.5">
-        {segment.placeSignals.map((signal) => (
-          <div
-            key={signal.placeName}
-            className="rounded-[1rem] border border-white/8 bg-white/5 px-4 py-3.5"
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-medium text-white">
-                  {signal.placeName}
-                </p>
-                <p className="mt-1 text-xs text-white/60">
-                  {signal.signalType}
-                </p>
-              </div>
-              <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[11px] text-white/72">
-                신호 {signal.signalScore}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className="rounded-[1rem] border border-white/8 bg-white/5 px-4 py-3 text-sm text-white/68">
-        현재 추적 중인 지역: {city.label}
+      <div className="rounded-[1rem] border border-white/8 bg-white/5 px-3.5 py-3 text-xs leading-5 text-white/68">
+        {selectedSummaryLine(segment)} 현재 추적 지역: {city.label}
       </div>
     </div>
   );
 }
 
-function InfoMetric({ label, value }: { label: string; value: string }) {
+function selectedSummaryLine(segment: RoadSegment) {
+  return `${segment.summary} `;
+}
+
+function InfoMetricCompact({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="rounded-[1rem] border border-white/8 bg-white/5 px-4 py-3">
-      <p className="text-[11px] uppercase tracking-[0.12em] text-white/48">
+    <div className="rounded-[0.95rem] border border-white/8 bg-white/5 px-3 py-2.5">
+      <p className="text-[10px] uppercase tracking-[0.12em] text-white/46">
         {label}
       </p>
-      <p className="mt-2 text-base font-medium text-white">{value}</p>
+      <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-4 text-white">
+        {value}
+      </p>
     </div>
   );
 }
