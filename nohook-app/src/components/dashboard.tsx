@@ -51,9 +51,8 @@ const uiCopy = {
   ko: {
     beta: "Nohook beta",
     mapTag: "베트남 거리 위험 지도",
-    heroTitle: "지도 위에서\n호객 많은 거리를\n먼저 봅니다",
-    heroBody:
-      "왼쪽 위에서 언어를 바꾸고, 살 물건을 입력하면 AI가 매칭해 가까운 가게와 평균 가격을 지도에 표시합니다.",
+    heroTitle: "위험 거리부터\n지도로 봅니다",
+    heroBody: "언어 전환과 상품 입력만 남기고, 지도 비중을 키웠습니다.",
     monitoring: "모니터링",
     highRisk: "고위험",
     recentReports: "최근 신고",
@@ -69,7 +68,7 @@ const uiCopy = {
     itemZoomHint: "가격 라벨은 지도를 더 확대하면 나타납니다.",
     itemZoomReady: "확대된 상태에서 가게별 평균 가격을 표시합니다.",
     itemRecommendations: "추천 가게",
-    cityOverlay: "도로 색상 오버레이",
+    cityOverlay: "도로 오버레이",
     selectedRoad: "선택 도로",
     riskInfo: "위험 정보",
     report: "신고하기",
@@ -96,9 +95,8 @@ const uiCopy = {
   en: {
     beta: "Nohook beta",
     mapTag: "Vietnam street risk map",
-    heroTitle: "See risky\nstreets first\non the map",
-    heroBody:
-      "Switch language on the top left, type what you want to buy, and the app will match shops plus average prices on the map.",
+    heroTitle: "See risky\nstreets first",
+    heroBody: "Less text, more map. Language toggle and shopping search stay on top.",
     monitoring: "Tracking",
     highRisk: "High risk",
     recentReports: "Recent reports",
@@ -114,7 +112,7 @@ const uiCopy = {
     itemZoomHint: "Zoom in more to reveal price labels on shops.",
     itemZoomReady: "Shop-level average prices are visible at this zoom.",
     itemRecommendations: "Suggested shops",
-    cityOverlay: "Road color overlay",
+    cityOverlay: "Road overlay",
     selectedRoad: "Selected road",
     riskInfo: "Risk info",
     report: "Report",
@@ -265,15 +263,15 @@ export function Dashboard({ cities }: DashboardProps) {
   const sheetHeightClass =
     activeTab === "report"
       ? sheetMode === "peek"
-        ? "max-h-[16vh]"
+        ? "max-h-[12vh]"
         : sheetMode === "mid"
-          ? "max-h-[24vh]"
+          ? "max-h-[20vh]"
           : "max-h-[36vh]"
       : sheetMode === "peek"
-        ? "max-h-[10vh]"
+        ? "max-h-[7vh]"
         : sheetMode === "mid"
-          ? "max-h-[18vh]"
-          : "max-h-[28vh]";
+          ? "max-h-[13vh]"
+          : "max-h-[22vh]";
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#071019] text-white">
@@ -285,16 +283,16 @@ export function Dashboard({ cities }: DashboardProps) {
         <LocaleButton active={locale === "en"} label="EN" onClick={() => setLocale("en")} />
       </div>
 
-      <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1280px] flex-col items-center justify-center gap-6 px-4 py-6 xl:flex-row xl:justify-between">
-        <div className="w-full max-w-[272px] xl:max-w-[292px]">
-          <div className="rounded-[1.8rem] border border-white/10 bg-white/6 p-4 shadow-[0_24px_72px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+      <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1180px] flex-col items-center justify-center gap-4 px-4 py-5 xl:flex-row xl:justify-between">
+        <div className="w-full max-w-[228px] xl:max-w-[240px]">
+          <div className="rounded-[1.6rem] border border-white/10 bg-white/6 p-3.5 shadow-[0_24px_72px_rgba(0,0,0,0.28)] backdrop-blur-xl">
             <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/68">
               <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1">{t.beta}</span>
               <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1">{t.mapTag}</span>
             </div>
-            <h1 className="mt-4 whitespace-pre-line text-[2.55rem] font-semibold leading-[0.98] tracking-[-0.065em] text-white xl:text-[2.75rem]">{t.heroTitle}</h1>
-            <p className="mt-3 text-[13px] leading-6 text-white/72">{t.heroBody}</p>
-            <div className="mt-4 grid grid-cols-3 gap-2.5">
+            <h1 className="mt-3 whitespace-pre-line text-[2rem] font-semibold leading-[0.94] tracking-[-0.07em] text-white xl:text-[2.15rem]">{t.heroTitle}</h1>
+            <p className="mt-2 text-[12px] leading-5 text-white/68">{t.heroBody}</p>
+            <div className="mt-3 grid grid-cols-3 gap-2">
               <HeroStat label={t.monitoring} value="6" />
               <HeroStat label={t.highRisk} value="2" />
               <HeroStat label={t.recentReports} value="33" />
@@ -313,12 +311,12 @@ export function Dashboard({ cities }: DashboardProps) {
               </div>
             </div>
 
-            <div className="relative z-30 px-3.5">
-              <div className="rounded-[1.18rem] border border-white/10 bg-black/34 px-3.5 py-2.5 shadow-[0_14px_30px_rgba(0,0,0,0.2)] backdrop-blur-xl">
+            <div className="relative z-30 px-3">
+              <div className="rounded-[1.08rem] border border-white/10 bg-black/28 px-3 py-2 shadow-[0_12px_24px_rgba(0,0,0,0.18)] backdrop-blur-xl">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-white/44">Nohook</p>
-                    <h2 className="mt-1 text-[1.2rem] font-semibold tracking-[-0.05em]">{t.todayRoute}</h2>
+                    <h2 className="mt-1 text-[1.05rem] font-semibold tracking-[-0.05em]">{t.todayRoute}</h2>
                   </div>
                   <Link href="/admin" className="rounded-full border border-white/12 bg-white/6 px-2.5 py-1.5 text-[10px] text-white/76">{t.admin}</Link>
                 </div>
@@ -363,9 +361,9 @@ export function Dashboard({ cities }: DashboardProps) {
                   </div>
                 ) : null}
 
-                <div className="mt-3 flex gap-2">
+                <div className="mt-2.5 flex gap-2">
                   {cities.map((city) => (
-                    <button key={city.id} type="button" onClick={() => selectCity(city.id)} className={`rounded-full px-3 py-2 text-xs font-medium transition ${city.id === activeCityId ? "bg-white text-stone-950" : "border border-white/12 bg-white/6 text-white/78"}`}>
+                    <button key={city.id} type="button" onClick={() => selectCity(city.id)} className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition ${city.id === activeCityId ? "bg-white text-stone-950" : "border border-white/12 bg-white/6 text-white/78"}`}>
                       {locale === "ko" ? city.shortLabel : city.shortLabelEn}
                     </button>
                   ))}
@@ -373,30 +371,30 @@ export function Dashboard({ cities }: DashboardProps) {
               </div>
             </div>
 
-            <div className="relative z-0 mt-2.5 flex-1 px-3.5 pb-3.5">
+            <div className="relative z-0 mt-2 flex-1 px-3 pb-3">
               <div className="relative h-full overflow-hidden rounded-[1.72rem] border border-white/10 bg-[#091018] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
                 <GoogleRiskMap ref={mapRef} city={activeCity} selectedSegmentId={selectedSegment.id} selectedProductId={matchedProduct?.id} locale={locale} onSelectSegment={setSelectedSegmentId} onZoomLevelChange={setMapZoom} />
 
-                <div className="absolute left-2.5 top-2.5 z-30 flex flex-wrap items-center gap-1.5">
-                  <span className="rounded-full border border-white/10 bg-black/44 px-2.5 py-1 text-[10px] font-medium text-white/88 backdrop-blur-xl">{locale === "ko" ? activeCity.label : activeCity.labelEn}</span>
-                  <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.2)]" style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}>
+                <div className="absolute left-2 top-2 z-30 flex flex-wrap items-center gap-1">
+                  <span className="rounded-full border border-white/10 bg-black/44 px-2 py-1 text-[9px] font-medium text-white/88 backdrop-blur-xl">{locale === "ko" ? activeCity.shortLabel : activeCity.shortLabelEn}</span>
+                  <span className="rounded-full px-2 py-1 text-[9px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.2)]" style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}>
                     {locale === "ko" ? riskLabelMap[selectedSegment.riskLevel] : riskLabelMapEn[selectedSegment.riskLevel]}
                   </span>
-                  <span className="rounded-full border border-white/10 bg-black/44 px-2.5 py-1 text-[10px] text-white/82 backdrop-blur-xl">{t.cityOverlay}</span>
+                  <span className="rounded-full border border-white/10 bg-black/44 px-2 py-1 text-[9px] text-white/82 backdrop-blur-xl">{t.cityOverlay}</span>
                 </div>
 
-                <div className="absolute right-2.5 top-2.5 z-30 flex flex-col gap-1.5">
+                <div className="absolute right-2 top-2 z-30 flex flex-col gap-1.5">
                   <MapButton label="+" onClick={() => mapRef.current?.zoomIn()} />
                   <MapButton label="-" onClick={() => mapRef.current?.zoomOut()} />
                 </div>
 
-                <div className="absolute inset-x-0 bottom-0 z-30 px-2.5 pb-2.5">
+                <div className="absolute inset-x-0 bottom-0 z-30 px-2 pb-2">
                   <div className={`rounded-[1.2rem] border border-white/10 bg-[rgba(7,12,18,0.82)] shadow-[0_16px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl ${activeTab === "report" ? "" : "bg-[rgba(7,12,18,0.76)]"}`}>
-                    <div className="flex items-center justify-center pt-2">
+                    <div className="flex items-center justify-center pt-1.5">
                       <button
                         type="button"
                         onClick={cycleSheetMode}
-                        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[10px] text-white/72"
+                        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[9px] text-white/72"
                       >
                         <span className="block h-1 w-8 rounded-full bg-white/38" />
                         <span>
@@ -414,20 +412,20 @@ export function Dashboard({ cities }: DashboardProps) {
                         </span>
                       </button>
                     </div>
-                    <div className="flex items-center justify-between gap-2.5 border-b border-white/8 px-3.5 py-2.5">
+                    <div className="flex items-center justify-between gap-2 border-b border-white/8 px-3 py-2">
                       <div className="min-w-0">
                         <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">{t.selectedRoad}</p>
-                        <p className="mt-1 truncate text-[13px] font-semibold tracking-[-0.03em]">{locale === "ko" ? selectedSegment.name : selectedSegment.nameEn}</p>
+                        <p className="mt-1 truncate text-[12px] font-semibold tracking-[-0.03em]">{locale === "ko" ? selectedSegment.name : selectedSegment.nameEn}</p>
                       </div>
-                      <span className="shrink-0 rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[10px] text-white/72">{t.reportCount} {selectedSegment.recentReportCount}</span>
+                      <span className="shrink-0 rounded-full border border-white/10 bg-white/6 px-2 py-1 text-[9px] text-white/72">{selectedSegment.recentReportCount}</span>
                     </div>
 
-                    <div className="flex gap-2 px-3.5 pt-2.5">
+                    <div className="flex gap-2 px-3 pt-2">
                       <TabButton active={activeTab === "map"} label={t.riskInfo} onClick={() => setActiveTab("map")} />
                       <TabButton active={activeTab === "report"} label={t.report} onClick={() => setActiveTab("report")} />
                     </div>
 
-                    <div className={`overflow-y-auto px-3.5 pb-3.5 pt-2.5 ${sheetHeightClass}`}>
+                    <div className={`overflow-y-auto px-3 pb-3 pt-2 ${sheetHeightClass}`}>
                       {activeTab === "map" ? (
                         <InsightPanel city={activeCity} locale={locale} matchedProduct={matchedProduct} matchedStores={matchedStores} selectedSegment={selectedSegment} zoomLevel={mapZoom} zoomThreshold={zoomThreshold} getCategoryLabel={getCategoryLabel} />
                       ) : (
@@ -540,3 +538,4 @@ function ReportPanel({ city, locale, reportState, selectedSegment, onSubmit }: {
     </section>
   );
 }
+
