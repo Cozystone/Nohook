@@ -52,15 +52,28 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
     const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
     const [zoomLevel, setZoomLevel] = useState(15);
     const [mapReady, setMapReady] = useState(false);
+    const [fallbackZoom, setFallbackZoom] = useState(1);
 
     useImperativeHandle(ref, () => ({
       zoomIn() {
-        mapRef.current?.zoomIn();
+        if (mapRef.current && loadState !== "error") {
+          const nextZoom = Math.min((mapRef.current.getZoom() ?? city.zoom) + 1, 19);
+          mapRef.current.setZoom(nextZoom);
+          mapRef.current.invalidateSize();
+          return;
+        }
+        setFallbackZoom((current) => Math.min(current + 0.18, 2.2));
       },
       zoomOut() {
-        mapRef.current?.zoomOut();
+        if (mapRef.current && loadState !== "error") {
+          const nextZoom = Math.max((mapRef.current.getZoom() ?? city.zoom) - 1, 11);
+          mapRef.current.setZoom(nextZoom);
+          mapRef.current.invalidateSize();
+          return;
+        }
+        setFallbackZoom((current) => Math.max(current - 0.18, 1));
       },
-    }));
+    }), [city.zoom, loadState]);
 
     useEffect(() => {
       if (!containerRef.current) return;
@@ -75,6 +88,12 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           zoomControl: false,
           attributionControl: false,
           preferCanvas: true,
+          scrollWheelZoom: true,
+          doubleClickZoom: true,
+          touchZoom: true,
+          dragging: true,
+          boxZoom: false,
+          keyboard: false,
         });
 
         mapRef.current = map;
@@ -120,7 +139,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
         if (mapStyle === "roadmap") {
           const roadLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: 19,
-            opacity: 0.94,
+            opacity: 0.96,
             crossOrigin: true,
           });
           roadLayer.on("load", () => setLoadState("ready"));
@@ -397,6 +416,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
             city={city}
             selectedSegmentId={selectedSegmentId}
             onSelectSegment={onSelectSegment}
+            zoomScale={fallbackZoom}
           />
         ) : null}
 
@@ -432,32 +452,39 @@ function formatShopCorridorTooltip(corridor: ShopCorridor, locale: AppLocale) {
   return `${streetName}\n${levelCopy}\n${countCopy}`;
 }
 
-function FallbackSatelliteMap({ city, selectedSegmentId, onSelectSegment }: Pick<RiskMapProps, "city" | "selectedSegmentId" | "onSelectSegment">) {
+function FallbackSatelliteMap({
+  city,
+  selectedSegmentId,
+  onSelectSegment,
+  zoomScale,
+}: Pick<RiskMapProps, "city" | "selectedSegmentId" | "onSelectSegment"> & { zoomScale: number }) {
   const projected = useMemo(() => projectCity(city), [city]);
 
   return (
     <div className="absolute inset-0 z-10 overflow-hidden bg-[#10161d]">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(79,111,78,0.45),transparent_20%),radial-gradient(circle_at_72%_28%,rgba(96,87,62,0.32),transparent_18%),radial-gradient(circle_at_58%_76%,rgba(58,85,68,0.42),transparent_22%),linear-gradient(180deg,#0d1319_0%,#161f29_100%)]" />
       <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:120px_120px]" />
-      <svg viewBox={`0 0 ${FALLBACK_WIDTH} ${FALLBACK_HEIGHT}`} className="absolute inset-0 h-full w-full" role="img" aria-label={`${city.label} demo satellite map`}>
-        <rect width={FALLBACK_WIDTH} height={FALLBACK_HEIGHT} fill="#101720" />
-        {projected.landMasses.map((mass, index) => <path key={`mass-${index}`} d={mass.d} fill={mass.fill} opacity={mass.opacity} />)}
-        {projected.roadBeds.map((road, index) => <path key={`roadbed-${index}`} d={road} fill="none" stroke="#5f6770" strokeWidth="24" strokeLinecap="round" strokeLinejoin="round" opacity="0.62" />)}
-        {projected.roadBeds.map((road, index) => <path key={`roadline-${index}`} d={road} fill="none" stroke="#c3b7a1" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" opacity="0.72" />)}
-        {projected.segmentPaths.map((segment) => {
-          const isSelected = segment.id === selectedSegmentId;
-          return (
-            <g key={segment.id}>
-              <path d={segment.path} fill="none" stroke={riskPalette[segment.riskLevel]} strokeWidth={isSelected ? 22 : 18} strokeLinecap="round" strokeLinejoin="round" opacity={isSelected ? 0.3 : 0.18} />
-              <path d={segment.path} fill="none" stroke="#fff6e4" strokeWidth={isSelected ? 10 : 8} strokeLinecap="round" strokeLinejoin="round" opacity={isSelected ? 0.8 : 0.56} />
-              <path d={segment.path} fill="none" stroke={riskPalette[segment.riskLevel]} strokeWidth={isSelected ? 7 : 6} strokeLinecap="round" strokeLinejoin="round" opacity="1" className="cursor-pointer" onClick={() => onSelectSegment(segment.id)} />
-            </g>
-          );
-        })}
-        {projected.landmarks.map((landmark) => (
-          <g key={landmark.label}><circle cx={landmark.x} cy={landmark.y} r="6" fill="#f8fafc" opacity="0.95" /><text x={landmark.x + 12} y={landmark.y + 4} fill="#f8fafc" fontSize="22" fontWeight="600" opacity="0.92">{landmark.label}</text></g>
-        ))}
-      </svg>
+      <div className="absolute inset-0 origin-center transition-transform duration-200" style={{ transform: `scale(${zoomScale})` }}>
+        <svg viewBox={`0 0 ${FALLBACK_WIDTH} ${FALLBACK_HEIGHT}`} className="absolute inset-0 h-full w-full" role="img" aria-label={`${city.label} demo satellite map`}>
+          <rect width={FALLBACK_WIDTH} height={FALLBACK_HEIGHT} fill="#101720" />
+          {projected.landMasses.map((mass, index) => <path key={`mass-${index}`} d={mass.d} fill={mass.fill} opacity={mass.opacity} />)}
+          {projected.roadBeds.map((road, index) => <path key={`roadbed-${index}`} d={road} fill="none" stroke="#5f6770" strokeWidth="24" strokeLinecap="round" strokeLinejoin="round" opacity="0.62" />)}
+          {projected.roadBeds.map((road, index) => <path key={`roadline-${index}`} d={road} fill="none" stroke="#c3b7a1" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" opacity="0.72" />)}
+          {projected.segmentPaths.map((segment) => {
+            const isSelected = segment.id === selectedSegmentId;
+            return (
+              <g key={segment.id}>
+                <path d={segment.path} fill="none" stroke={riskPalette[segment.riskLevel]} strokeWidth={isSelected ? 22 : 18} strokeLinecap="round" strokeLinejoin="round" opacity={isSelected ? 0.3 : 0.18} />
+                <path d={segment.path} fill="none" stroke="#fff6e4" strokeWidth={isSelected ? 10 : 8} strokeLinecap="round" strokeLinejoin="round" opacity={isSelected ? 0.8 : 0.56} />
+                <path d={segment.path} fill="none" stroke={riskPalette[segment.riskLevel]} strokeWidth={isSelected ? 7 : 6} strokeLinecap="round" strokeLinejoin="round" opacity="1" className="cursor-pointer" onClick={() => onSelectSegment(segment.id)} />
+              </g>
+            );
+          })}
+          {projected.landmarks.map((landmark) => (
+            <g key={landmark.label}><circle cx={landmark.x} cy={landmark.y} r="6" fill="#f8fafc" opacity="0.95" /><text x={landmark.x + 12} y={landmark.y + 4} fill="#f8fafc" fontSize="22" fontWeight="600" opacity="0.92">{landmark.label}</text></g>
+          ))}
+        </svg>
+      </div>
     </div>
   );
 }
@@ -523,4 +550,3 @@ function toSmoothPath(points: Array<{ x: number; y: number }>) {
   path += ` T ${last.x} ${last.y}`;
   return path;
 }
-
