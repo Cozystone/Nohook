@@ -21,7 +21,7 @@ export function GoogleRiskMap({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
   const segmentLinesRef = useRef<Map<string, google.maps.Polyline>>(new Map());
-  const labelMarkersRef = useRef<google.maps.Marker[]>([]);
+  const markerRefs = useRef<google.maps.Marker[]>([]);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const [loadState, setLoadState] = useState<
     "idle" | "loading" | "ready" | "error" | "missing-key"
@@ -34,7 +34,7 @@ export function GoogleRiskMap({
 
     let active = true;
     const segmentLines = segmentLinesRef.current;
-    const labelMarkers = labelMarkersRef.current;
+    const markers = markerRefs.current;
 
     async function loadMap() {
       try {
@@ -43,12 +43,14 @@ export function GoogleRiskMap({
         const { setOptions, importLibrary } = await import(
           "@googlemaps/js-api-loader"
         );
+
         setOptions({
           key: apiKey,
           v: "weekly",
           language: "ko",
           region: "KR",
         });
+
         await importLibrary("maps");
 
         if (!active || !containerRef.current) {
@@ -58,19 +60,15 @@ export function GoogleRiskMap({
         mapRef.current = new google.maps.Map(containerRef.current, {
           center: city.mapCenter,
           zoom: city.zoom,
+          mapTypeId: "satellite",
+          tilt: 0,
           disableDefaultUI: true,
           zoomControl: true,
-          clickableIcons: false,
-          gestureHandling: "greedy",
-          mapTypeControl: true,
-          mapTypeControlOptions: {
-            style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
-            position: google.maps.ControlPosition.TOP_RIGHT,
-            mapTypeIds: ["roadmap", "satellite"],
-          },
           streetViewControl: false,
           fullscreenControl: false,
-          mapTypeId: "satellite",
+          mapTypeControl: false,
+          clickableIcons: false,
+          gestureHandling: "greedy",
         });
 
         setLoadState("ready");
@@ -87,8 +85,9 @@ export function GoogleRiskMap({
       active = false;
       segmentLines.forEach((polyline) => polyline.setMap(null));
       segmentLines.clear();
-      labelMarkers.forEach((marker) => marker.setMap(null));
-      labelMarkersRef.current = [];
+      markers.forEach((marker) => marker.setMap(null));
+      markerRefs.current = [];
+      mapRef.current = null;
     };
   }, [apiKey, city.id, city.mapCenter, city.zoom]);
 
@@ -99,8 +98,8 @@ export function GoogleRiskMap({
 
     segmentLinesRef.current.forEach((polyline) => polyline.setMap(null));
     segmentLinesRef.current.clear();
-    labelMarkersRef.current.forEach((marker) => marker.setMap(null));
-    labelMarkersRef.current = [];
+    markerRefs.current.forEach((marker) => marker.setMap(null));
+    markerRefs.current = [];
 
     const bounds = new google.maps.LatLngBounds();
 
@@ -111,13 +110,12 @@ export function GoogleRiskMap({
         path: segment.path,
         geodesic: true,
         strokeColor: riskPalette[segment.riskLevel],
-        strokeOpacity: isSelected ? 1 : 0.84,
-        strokeWeight: isSelected ? 10 : 7,
+        strokeOpacity: isSelected ? 1 : 0.88,
+        strokeWeight: isSelected ? 9 : 7,
         zIndex: isSelected ? 30 : 20,
       });
 
       polyline.addListener("click", () => onSelectSegment(segment.id));
-
       segment.path.forEach((point) => bounds.extend(point));
       segmentLinesRef.current.set(segment.id, polyline);
     });
@@ -127,28 +125,22 @@ export function GoogleRiskMap({
         map: mapRef.current!,
         position: landmark.position,
         title: landmark.label,
-        label: {
-          text: landmark.label,
-          color: "#ffffff",
-          fontSize: "11px",
-          fontWeight: "700",
-        },
         icon: {
           path: google.maps.SymbolPath.CIRCLE,
-          fillColor: "#103534",
-          fillOpacity: 1,
-          strokeColor: "#ffffff",
+          fillColor: "#f8fafc",
+          fillOpacity: 0.95,
+          strokeColor: "#0f172a",
           strokeWeight: 2,
-          scale: 6,
+          scale: 5,
         },
       });
 
-      labelMarkersRef.current.push(marker);
+      markerRefs.current.push(marker);
       bounds.extend(landmark.position);
     });
 
     if (!bounds.isEmpty()) {
-      mapRef.current.fitBounds(bounds, 96);
+      mapRef.current.fitBounds(bounds, 88);
     }
   }, [city, loadState, onSelectSegment, selectedSegmentId]);
 
@@ -166,34 +158,43 @@ export function GoogleRiskMap({
       }
 
       polyline.setOptions({
-        strokeOpacity: isSelected ? 1 : 0.84,
-        strokeWeight: isSelected ? 10 : 7,
+        strokeOpacity: isSelected ? 1 : 0.88,
+        strokeWeight: isSelected ? 9 : 7,
         zIndex: isSelected ? 30 : 20,
       });
     });
   }, [city.segments, loadState, selectedSegmentId]);
 
+  const statusLabel =
+    loadState === "loading"
+      ? "실제 위성 지도를 불러오는 중"
+      : loadState === "error"
+        ? "위성 지도를 불러오지 못해 데모 지도로 표시 중"
+        : loadState === "missing-key"
+          ? "API 키가 없어 데모 지도로 표시 중"
+          : null;
+
   return (
     <div className="absolute inset-0">
-      {loadState === "ready" ? (
-        <div ref={containerRef} className="h-full w-full" />
-      ) : (
+      <div
+        ref={containerRef}
+        className={`absolute inset-0 transition-opacity duration-300 ${
+          loadState === "ready" ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      {loadState !== "ready" ? (
         <FallbackSatelliteMap
           city={city}
           selectedSegmentId={selectedSegmentId}
           onSelectSegment={onSelectSegment}
-          status={loadState}
         />
-      )}
+      ) : null}
 
-      {loadState === "loading" ? (
-        <MapStatusPill label="Google 위성 지도를 불러오는 중" />
-      ) : null}
-      {loadState === "missing-key" ? (
-        <MapStatusPill label="위성 데모 지도 표시 중 · API 키 미설정" />
-      ) : null}
-      {loadState === "error" ? (
-        <MapStatusPill label="위성 데모 지도 표시 중 · 지도 로드 실패" />
+      {statusLabel ? (
+        <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/65 px-4 py-2 text-xs text-white/90 backdrop-blur-md">
+          {statusLabel}
+        </div>
       ) : null}
     </div>
   );
@@ -203,34 +204,32 @@ function FallbackSatelliteMap({
   city,
   selectedSegmentId,
   onSelectSegment,
-  status,
 }: {
   city: CityData;
   selectedSegmentId: string;
   onSelectSegment: (id: string) => void;
-  status: "idle" | "loading" | "ready" | "error" | "missing-key";
 }) {
   const projected = useMemo(() => projectCity(city), [city]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#101722]">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_16%,rgba(94,120,86,0.48),transparent_18%),radial-gradient(circle_at_76%_28%,rgba(120,118,80,0.36),transparent_18%),radial-gradient(circle_at_58%_72%,rgba(72,95,70,0.42),transparent_20%),linear-gradient(180deg,#0b1016_0%,#131d28_100%)]" />
-      <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:120px_120px]" />
+    <div className="relative h-full w-full overflow-hidden bg-[#10161d]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(79,111,78,0.45),transparent_20%),radial-gradient(circle_at_72%_28%,rgba(96,87,62,0.32),transparent_18%),radial-gradient(circle_at_58%_76%,rgba(58,85,68,0.42),transparent_22%),linear-gradient(180deg,#0d1319_0%,#161f29_100%)]" />
+      <div className="absolute inset-0 opacity-15 [background-image:linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] [background-size:120px_120px]" />
 
       <svg
         viewBox={`0 0 ${FALLBACK_WIDTH} ${FALLBACK_HEIGHT}`}
         className="absolute inset-0 h-full w-full"
         role="img"
-        aria-label={`${city.label} 위성 데모 지도`}
+        aria-label={`${city.label} 데모 위성 지도`}
       >
-        <rect width={FALLBACK_WIDTH} height={FALLBACK_HEIGHT} fill="#0c131a" />
+        <rect width={FALLBACK_WIDTH} height={FALLBACK_HEIGHT} fill="#101720" />
 
-        {projected.greenMasses.map((block, index) => (
+        {projected.landMasses.map((mass, index) => (
           <path
             key={`mass-${index}`}
-            d={block.d}
-            fill={block.fill}
-            opacity={block.opacity}
+            d={mass.d}
+            fill={mass.fill}
+            opacity={mass.opacity}
           />
         ))}
 
@@ -239,24 +238,24 @@ function FallbackSatelliteMap({
             key={`roadbed-${index}`}
             d={road}
             fill="none"
-            stroke="#6d747c"
-            strokeWidth="28"
+            stroke="#5f6770"
+            strokeWidth="24"
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity="0.68"
+            opacity="0.62"
           />
         ))}
 
         {projected.roadBeds.map((road, index) => (
           <path
-            key={`roadcore-${index}`}
+            key={`roadline-${index}`}
             d={road}
             fill="none"
-            stroke="#c8c3b3"
-            strokeWidth="10"
+            stroke="#c3b7a1"
+            strokeWidth="7"
             strokeLinecap="round"
             strokeLinejoin="round"
-            opacity="0.78"
+            opacity="0.72"
           />
         ))}
 
@@ -269,7 +268,7 @@ function FallbackSatelliteMap({
                 d={segment.path}
                 fill="none"
                 stroke="#ffffff"
-                strokeWidth={isSelected ? 22 : 18}
+                strokeWidth={isSelected ? 18 : 14}
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 opacity="0.12"
@@ -278,10 +277,10 @@ function FallbackSatelliteMap({
                 d={segment.path}
                 fill="none"
                 stroke={riskPalette[segment.riskLevel]}
-                strokeWidth={isSelected ? 14 : 11}
+                strokeWidth={isSelected ? 11 : 8}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity={isSelected ? 1 : 0.86}
+                opacity={isSelected ? 1 : 0.88}
                 className="cursor-pointer"
                 onClick={() => onSelectSegment(segment.id)}
               />
@@ -294,27 +293,17 @@ function FallbackSatelliteMap({
             <circle
               cx={landmark.x}
               cy={landmark.y}
-              r="8"
-              fill="#e9f3f0"
-              fillOpacity="0.94"
-            />
-            <circle cx={landmark.x} cy={landmark.y} r="4" fill="#103534" />
-            <rect
-              x={landmark.x + 14}
-              y={landmark.y - 17}
-              width={Math.max(82, landmark.label.length * 8)}
-              height="26"
-              rx="13"
-              fill="rgba(5,8,13,0.78)"
-              stroke="rgba(255,255,255,0.12)"
+              r="6"
+              fill="#f8fafc"
+              opacity="0.95"
             />
             <text
-              x={landmark.x + 28}
-              y={landmark.y}
-              fill="#ffffff"
-              fontSize="12"
-              fontWeight="700"
-              dominantBaseline="middle"
+              x={landmark.x + 12}
+              y={landmark.y + 4}
+              fill="#f8fafc"
+              fontSize="22"
+              fontWeight="600"
+              opacity="0.92"
             >
               {landmark.label}
             </text>
@@ -322,40 +311,20 @@ function FallbackSatelliteMap({
         ))}
       </svg>
 
-      <div className="absolute left-4 top-4 flex items-center gap-2">
-        <MapChromePill label="Satellite Demo" />
-        <MapChromePill
-          label={status === "missing-key" ? "발표용 데모 뷰" : "대체 위성 렌더링"}
-        />
+      <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-black/55 px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-white/82 backdrop-blur-md">
+        Satellite Demo
       </div>
-
-      <div className="absolute right-4 top-16 flex flex-col gap-2">
-        <FakeControlButton label="+" />
-        <FakeControlButton label="−" />
+      <div className="absolute right-4 top-4 flex flex-col gap-2">
+        <MapButton label="+" />
+        <MapButton label="-" />
       </div>
     </div>
   );
 }
 
-function MapChromePill({ label }: { label: string }) {
+function MapButton({ label }: { label: string }) {
   return (
-    <div className="rounded-full border border-white/12 bg-black/38 px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-white/82 backdrop-blur-md">
-      {label}
-    </div>
-  );
-}
-
-function FakeControlButton({ label }: { label: string }) {
-  return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-black/42 text-lg font-semibold text-white/90 backdrop-blur-md">
-      {label}
-    </div>
-  );
-}
-
-function MapStatusPill({ label }: { label: string }) {
-  return (
-    <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/42 px-4 py-2 text-xs text-white/86 backdrop-blur-md">
+    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-black/55 text-lg font-semibold text-white/88 backdrop-blur-md">
       {label}
     </div>
   );
@@ -399,10 +368,12 @@ function projectCity(city: CityData) {
     path: toSmoothPath(segment.path.map(project)),
   }));
 
-  const roadBeds = buildRoadBeds(landmarks);
-  const greenMasses = buildGreenMasses(landmarks);
-
-  return { landmarks, segmentPaths, roadBeds, greenMasses };
+  return {
+    segmentPaths,
+    landmarks,
+    roadBeds: buildRoadBeds(landmarks),
+    landMasses: buildLandMasses(landmarks),
+  };
 }
 
 function buildRoadBeds(landmarks: Array<{ label: string; x: number; y: number }>) {
@@ -413,25 +384,25 @@ function buildRoadBeds(landmarks: Array<{ label: string; x: number; y: number }>
   const [a, b, c] = landmarks;
 
   return [
-    `M ${a.x - 220} ${a.y - 120} C ${a.x - 60} ${a.y - 70}, ${b.x - 120} ${
-      b.y - 30
-    }, ${b.x + 90} ${b.y + 10}`,
-    `M ${a.x - 150} ${a.y + 120} C ${a.x + 30} ${a.y + 56}, ${c.x - 80} ${
-      c.y - 10
-    }, ${c.x + 180} ${c.y - 60}`,
-    `M ${b.x - 140} ${b.y + 160} C ${b.x - 10} ${b.y + 84}, ${c.x - 10} ${
-      c.y + 26
-    }, ${c.x + 150} ${c.y + 44}`,
-    `M ${FALLBACK_WIDTH - 260} 120 C ${FALLBACK_WIDTH - 170} 220, ${
+    `M ${a.x - 220} ${a.y - 120} C ${a.x - 50} ${a.y - 74}, ${b.x - 140} ${
+      b.y - 28
+    }, ${b.x + 96} ${b.y + 20}`,
+    `M ${a.x - 140} ${a.y + 136} C ${a.x + 36} ${a.y + 72}, ${c.x - 70} ${
+      c.y - 14
+    }, ${c.x + 180} ${c.y - 58}`,
+    `M ${b.x - 170} ${b.y + 160} C ${b.x - 12} ${b.y + 88}, ${c.x + 8} ${
+      c.y + 24
+    }, ${c.x + 156} ${c.y + 44}`,
+    `M ${FALLBACK_WIDTH - 260} 120 C ${FALLBACK_WIDTH - 174} 228, ${
       FALLBACK_WIDTH - 150
-    } 300, ${FALLBACK_WIDTH - 70} 430`,
-    `M 60 ${FALLBACK_HEIGHT - 180} C 230 ${FALLBACK_HEIGHT - 240}, 420 ${
-      FALLBACK_HEIGHT - 180
-    }, 620 ${FALLBACK_HEIGHT - 250}`,
+    } 306, ${FALLBACK_WIDTH - 68} 436`,
+    `M 60 ${FALLBACK_HEIGHT - 170} C 240 ${FALLBACK_HEIGHT - 240}, 440 ${
+      FALLBACK_HEIGHT - 192
+    }, 620 ${FALLBACK_HEIGHT - 254}`,
   ];
 }
 
-function buildGreenMasses(
+function buildLandMasses(
   landmarks: Array<{ label: string; x: number; y: number }>,
 ) {
   if (landmarks.length < 3) {
@@ -442,52 +413,45 @@ function buildGreenMasses(
 
   return [
     {
-      d: `M 0 0 H 360 C 310 70, 280 120, 220 160 C 150 205, 80 190, 0 150 Z`,
-      fill: "#294130",
+      d: "M 0 0 H 360 C 298 76, 270 132, 206 168 C 144 204, 74 194, 0 148 Z",
+      fill: "#2c4432",
       opacity: 0.7,
     },
     {
-      d: `M ${FALLBACK_WIDTH - 320} 0 H ${FALLBACK_WIDTH} V 250 C ${
-        FALLBACK_WIDTH - 70
-      } 220, ${FALLBACK_WIDTH - 150} 170, ${FALLBACK_WIDTH - 240} 110 C ${
-        FALLBACK_WIDTH - 290
-      } 70, ${FALLBACK_WIDTH - 308} 34, ${FALLBACK_WIDTH - 320} 0 Z`,
-      fill: "#3b5236",
-      opacity: 0.62,
+      d: `M ${FALLBACK_WIDTH - 320} 0 H ${FALLBACK_WIDTH} V 260 C ${
+        FALLBACK_WIDTH - 74
+      } 220, ${FALLBACK_WIDTH - 156} 174, ${FALLBACK_WIDTH - 240} 120 C ${
+        FALLBACK_WIDTH - 294
+      } 84, ${FALLBACK_WIDTH - 308} 36, ${FALLBACK_WIDTH - 320} 0 Z`,
+      fill: "#41563c",
+      opacity: 0.58,
     },
     {
-      d: `M ${a.x - 120} ${a.y + 70} C ${a.x - 30} ${a.y + 10}, ${
-        a.x + 110
-      } ${a.y + 20}, ${a.x + 120} ${a.y + 115} C ${a.x + 40} ${a.y + 162}, ${
-        a.x - 54
-      } ${a.y + 150}, ${a.x - 120} ${a.y + 70} Z`,
-      fill: "#40593c",
-      opacity: 0.42,
-    },
-    {
-      d: `M ${b.x - 150} ${b.y - 70} C ${b.x - 50} ${b.y - 130}, ${
-        b.x + 80
-      } ${b.y - 120}, ${b.x + 120} ${b.y - 20} C ${b.x + 60} ${b.y + 36}, ${
-        b.x - 40
-      } ${b.y + 48}, ${b.x - 150} ${b.y - 70} Z`,
-      fill: "#344a34",
-      opacity: 0.4,
-    },
-    {
-      d: `M ${c.x - 70} ${c.y - 120} C ${c.x + 50} ${c.y - 160}, ${
-        c.x + 150
-      } ${c.y - 84}, ${c.x + 130} ${c.y + 24} C ${c.x + 70} ${c.y + 70}, ${
-        c.x - 40
-      } ${c.y + 40}, ${c.x - 70} ${c.y - 120} Z`,
-      fill: "#445d42",
+      d: `M ${a.x - 120} ${a.y + 76} C ${a.x - 28} ${a.y + 12}, ${
+        a.x + 112
+      } ${a.y + 28}, ${a.x + 122} ${a.y + 118} C ${a.x + 40} ${a.y + 176}, ${
+        a.x - 50
+      } ${a.y + 152}, ${a.x - 120} ${a.y + 76} Z`,
+      fill: "#486245",
       opacity: 0.38,
     },
     {
-      d: `M 0 ${FALLBACK_HEIGHT - 210} C 130 ${FALLBACK_HEIGHT - 260}, 280 ${
-        FALLBACK_HEIGHT - 180
-      }, 380 ${FALLBACK_HEIGHT} H 0 Z`,
-      fill: "#253a2c",
-      opacity: 0.56,
+      d: `M ${b.x - 150} ${b.y - 82} C ${b.x - 48} ${b.y - 138}, ${
+        b.x + 84
+      } ${b.y - 126}, ${b.x + 124} ${b.y - 16} C ${b.x + 64} ${b.y + 48}, ${
+        b.x - 40
+      } ${b.y + 52}, ${b.x - 150} ${b.y - 82} Z`,
+      fill: "#394f39",
+      opacity: 0.38,
+    },
+    {
+      d: `M ${c.x - 74} ${c.y - 120} C ${c.x + 44} ${c.y - 168}, ${
+        c.x + 156
+      } ${c.y - 82}, ${c.x + 132} ${c.y + 30} C ${c.x + 64} ${c.y + 72}, ${
+        c.x - 38
+      } ${c.y + 40}, ${c.x - 74} ${c.y - 120} Z`,
+      fill: "#4f6b49",
+      opacity: 0.34,
     },
   ];
 }

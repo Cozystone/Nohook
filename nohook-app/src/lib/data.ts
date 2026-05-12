@@ -1,24 +1,24 @@
 import type { CityData, RiskLevel } from "@/lib/types";
 
 export const riskPalette: Record<RiskLevel, string> = {
-  Green: "#1f9d77",
-  Yellow: "#f0b23c",
-  Orange: "#f06a3a",
-  Red: "#cf3f2f",
+  Green: "#2ea67b",
+  Yellow: "#f1b84b",
+  Orange: "#f36d3f",
+  Red: "#d6453a",
 };
 
 export const riskLabelMap: Record<RiskLevel, string> = {
   Green: "낮음",
   Yellow: "주의",
   Orange: "반복 신고",
-  Red: "위험",
+  Red: "고위험",
 };
 
 export const categoryLabelMap: Record<string, string> = {
-  "Taxi scam": "택시 바가지/사기",
+  "Taxi scam": "택시 바가지",
   "Cyclo overcharge": "시클로 과다요금",
   "Aggressive touting": "강압적 호객",
-  "Forced tip / photo pressure": "사진 유도·팁 강요",
+  "Forced tip / photo pressure": "사진 유도 및 팁 강요",
   "Fake goods push": "가짜 상품 강매",
   "Verbal harassment": "언어적 괴롭힘",
   "Sexual harassment": "성적 괴롭힘",
@@ -37,7 +37,7 @@ export const travelerTypeLabelMap: Record<string, string> = {
   Pair: "2인 여행",
   Family: "가족 여행",
   Group: "단체 여행",
-  "Digital nomad": "디지털 노마드",
+  "Digital nomad": "장기 체류",
 };
 
 export const cities: CityData[] = [
@@ -49,9 +49,9 @@ export const cities: CityData[] = [
     mapCenter: { lat: 10.7728, lng: 106.6981 },
     zoom: 15,
     landmarks: [
-      { label: "Ben Thanh", position: { lat: 10.77246, lng: 106.69806 } },
-      { label: "Nguyen Hue", position: { lat: 10.77384, lng: 106.70412 } },
-      { label: "Bui Vien", position: { lat: 10.76733, lng: 106.69383 } },
+      { label: "벤탄시장", position: { lat: 10.77246, lng: 106.69806 } },
+      { label: "응우옌후에", position: { lat: 10.77384, lng: 106.70412 } },
+      { label: "부이비엔", position: { lat: 10.76733, lng: 106.69383 } },
     ],
     segments: [
       {
@@ -60,16 +60,16 @@ export const cities: CityData[] = [
         riskLevel: "Red",
         riskScore: 58,
         summary:
-          "시장 출입구와 택시 승하차 지점이 겹쳐 과다요금 요구와 강한 호객 신호가 반복됩니다.",
+          "시장 진입 직전 택시 권유, 시클로 과다요금, 사진 유도 후 팁 요구가 반복적으로 관측된 구간입니다.",
         topCategories: [
           "Taxi scam",
           "Cyclo overcharge",
           "Aggressive touting",
         ],
         reasons: [
-          "하차 후 추가 금액을 요구했다는 승인 신고가 반복적으로 누적됨.",
-          "가짜 택시, 과도한 탑승 권유 관련 리뷰 신호가 최근에도 이어짐.",
-          "오후부터 저녁 사이 관광객 밀집 시간대에 신호가 가장 강함.",
+          "하차 직후 추가 금액을 요구받았다는 신고가 반복적으로 쌓였습니다.",
+          "가짜 택시와 불법 픽업 유도가 최근 리뷰 신호에도 다시 나타났습니다.",
+          "오후부터 저녁 사이 관광객 밀집도가 높아 접근 빈도가 커집니다.",
         ],
         recentReportCount: 9,
         path: [
@@ -81,18 +81,18 @@ export const cities: CityData[] = [
         ],
         placeSignals: [
           {
-            placeName: "Ben Thanh curb pickup lane",
-            signalType: "승차 호객 클러스터",
+            placeName: "벤탄시장 북측 하차 라인",
+            signalType: "택시 호객 클러스터",
             signalScore: 12,
             evidence:
-              "같은 노변 구간에서 택시 권유와 요금 전환을 겪었다는 여행자 신고가 연속으로 발생했습니다.",
+              "같은 블록 구간에서 택시 권유와 과다요금 전환 사례가 연속적으로 보고되었습니다.",
           },
           {
-            placeName: "Market gate souvenir strip",
+            placeName: "시장 게이트 기념품 라인",
             signalType: "사진 유도 후 팁 요구",
             signalScore: 8,
             evidence:
-              "사진 소품을 먼저 씌운 뒤 팁을 요구했다는 신호가 시장 게이트 주변에서 반복됩니다.",
+              "바구니와 소품을 씌운 뒤 비용을 요구했다는 리뷰와 신고가 교차 확인되었습니다.",
           },
         ],
       },
@@ -102,12 +102,12 @@ export const cities: CityData[] = [
         riskLevel: "Orange",
         riskScore: 43,
         summary:
-          "야간 시간대 바·거리 상인 유입이 많아 호객, 경로 유도, 사진 강요 신호가 집중됩니다.",
+          "야간 시간대 바와 거리 상인 유입이 많아 강압적 호객과 사진 유도 신호가 집중되는 구간입니다.",
         topCategories: ["Aggressive touting", "Forced tip / photo pressure"],
         reasons: [
-          "해가 진 뒤부터 반복 호객과 바 유도 신고가 급증함.",
-          "여행자를 특정 업소로 끌어들이려는 시도와 사진 유도 패턴이 함께 포착됨.",
-          "강한 주의가 필요하지만 시장 북측 구간보다는 금전 피해 강도가 낮음.",
+          "입구 주변에서 반복적인 호객과 진로 방해 신고가 빠르게 늘어납니다.",
+          "특정 업소 진입 유도와 사진 촬영 압박이 함께 발생하는 패턴이 많습니다.",
+          "고위험 구간보다는 낮지만 지속적인 주의가 필요한 축입니다.",
         ],
         recentReportCount: 6,
         path: [
@@ -119,33 +119,33 @@ export const cities: CityData[] = [
         ],
         placeSignals: [
           {
-            placeName: "Nightlife entry strip",
-            signalType: "야간 호객 압박",
+            placeName: "나이트라이프 입구 스트립",
+            signalType: "야간 호객 밀집",
             signalScore: 10,
             evidence:
-              "짧은 블록 안에서 여러 업소 홍보 인력이 반복적으로 접근했다는 신호가 묶여 있습니다.",
+              "짧은 구간 안에서 여러 업소 홍보 인력이 반복적으로 접근했다는 신호가 모였습니다.",
           },
           {
-            placeName: "Photo basket corner",
-            signalType: "소품 착용 후 팁 강요",
+            placeName: "사진 바구니 코너",
+            signalType: "소품 착용 후 비용 강요",
             signalScore: 6,
             evidence:
-              "바구니 소품을 씌운 뒤 비용을 요구했다는 리뷰와 신고가 교차 확인됐습니다.",
+              "소품을 먼저 씌운 뒤 금액을 요구했다는 이용자 보고가 축적되었습니다.",
           },
         ],
       },
       {
         id: "hcmc-nguyen-hue-axis",
-        name: "응우옌후에 산책로 외곽",
+        name: "응우옌후에 산책로 남측",
         riskLevel: "Yellow",
         riskScore: 24,
         summary:
-          "전체적으로는 관리되는 편이지만 산책로 가장자리에서 비공식 탑승 권유와 소규모 강매 신호가 간헐적으로 나타납니다.",
+          "전체적으로는 관리되는 편이지만 가장자리 키오스크 구간에서 잡상인 유도와 가짜 상품 권유 신호가 간헐적으로 나타납니다.",
         topCategories: ["Aggressive touting", "Fake goods push"],
         reasons: [
-          "문제 신호가 전체 축이 아니라 일부 가장자리 포인트에 집중됨.",
-          "주간에는 상대적으로 약하고 저녁 시간대에만 산발적으로 증가함.",
-          "주의 구간이지만 즉시 회피 수준까지는 아님.",
+          "문제 신호가 전 구간이 아니라 보행로 가장자리 위주로 나타납니다.",
+          "주간보다 저녁 시간대에 한시적으로 빈도가 높아집니다.",
+          "즉시 회피가 필요한 수준은 아니지만 경계가 필요한 구간입니다.",
         ],
         recentReportCount: 3,
         path: [
@@ -157,11 +157,11 @@ export const cities: CityData[] = [
         ],
         placeSignals: [
           {
-            placeName: "Promenade edge kiosks",
+            placeName: "산책로 가장자리 키오스크",
             signalType: "가짜 상품 강매",
             signalScore: 5,
             evidence:
-              "산책로 외곽 키오스크에서 모조 액세서리를 강하게 권했다는 신호가 누적됐습니다.",
+              "산책로 주변 소형 판매대에서 모조 액세서리 구매 압박이 있었다는 신호가 확인되었습니다.",
           },
         ],
       },
@@ -171,13 +171,13 @@ export const cities: CityData[] = [
     id: "hanoi-old-quarter",
     shortLabel: "하노이 올드쿼터",
     label: "하노이 올드쿼터",
-    subtitle: "호안끼엠 서측, 야시장 진입로, 따히엔 야간 동선",
+    subtitle: "호안끼엠 서측, 야시장 진입로, 타히엔 야간 동선",
     mapCenter: { lat: 21.0338, lng: 105.8519 },
     zoom: 15,
     landmarks: [
-      { label: "Hoan Kiem", position: { lat: 21.02883, lng: 105.85239 } },
-      { label: "Night Market", position: { lat: 21.03556, lng: 105.8511 } },
-      { label: "Ta Hien", position: { lat: 21.03524, lng: 105.85232 } },
+      { label: "호안끼엠", position: { lat: 21.02883, lng: 105.85239 } },
+      { label: "야시장", position: { lat: 21.03556, lng: 105.8511 } },
+      { label: "타히엔", position: { lat: 21.03524, lng: 105.85232 } },
     ],
     segments: [
       {
@@ -186,16 +186,16 @@ export const cities: CityData[] = [
         riskLevel: "Red",
         riskScore: 54,
         summary:
-          "호수 접근 지점과 관광 병목 구간이 겹쳐 시클로 과다요금과 사진 유도 후 팁 요구가 강하게 포착됩니다.",
+          "호수 접근 축과 관광 보행로가 겹쳐 시클로 과다요금과 사진 소품 유도 후 팁 강요가 강하게 발생하는 구간입니다.",
         topCategories: [
           "Cyclo overcharge",
           "Forced tip / photo pressure",
           "Aggressive touting",
         ],
         reasons: [
-          "처음 제시한 금액보다 크게 더 요구했다는 시클로 신고 패턴이 반복됨.",
-          "전통 소품 착용 사진 후 팁을 강요했다는 신호가 동일 축에서 계속 관찰됨.",
-          "중복 신고를 제한해도 스코어가 높게 유지될 정도로 밀도가 높음.",
+          "처음 제시한 금액보다 크게 추가 청구했다는 시클로 신고 패턴이 반복됩니다.",
+          "전통 소품과 바구니를 이용한 사진 유도 후 금액 요구 신호가 계속 포착됩니다.",
+          "중복 신고가 누적되고 있어 첫 방문자 기준 회피 권고 수준입니다.",
         ],
         recentReportCount: 8,
         path: [
@@ -207,18 +207,18 @@ export const cities: CityData[] = [
         ],
         placeSignals: [
           {
-            placeName: "Lake tour corner",
-            signalType: "시클로 과금 전환",
+            placeName: "호수 투어 코너",
+            signalType: "시클로 요금 전환",
             signalScore: 11,
             evidence:
-              "탑승 전 제시 금액과 도착 후 청구 금액이 크게 달랐다는 여행자 신호가 반복됩니다.",
+              "탑승 전 제시 금액과 도착 후 청구 금액 차이가 컸다는 이용자 신호가 반복됩니다.",
           },
           {
-            placeName: "Photo prop pocket",
-            signalType: "사진 후 팁 강요",
+            placeName: "사진 소품 포켓 구간",
+            signalType: "사진 유도 후 팁 강요",
             signalScore: 9,
             evidence:
-              "사진을 찍고 나서 거절하기 어려운 분위기로 팁을 요구했다는 신호가 누적됩니다.",
+              "사진을 찍게 만든 뒤 거절하기 어려운 분위기로 팁을 요구했다는 내용이 누적되었습니다.",
           },
         ],
       },
@@ -228,12 +228,12 @@ export const cities: CityData[] = [
         riskLevel: "Orange",
         riskScore: 39,
         summary:
-          "야시장 인파로 인해 가짜 상품 권유와 보행 동선을 막는 호객이 자주 발생합니다.",
+          "야시장 진입 축에서 가짜 상품 권유와 보행 동선을 막는 호객이 자주 발생하는 구간입니다.",
         topCategories: ["Fake goods push", "Aggressive touting"],
         reasons: [
-          "유동 인구가 몰리는 시간대에 판매 압박이 강해짐.",
-          "금전 피해보다 강매와 진로 방해 성격의 신고가 더 많음.",
-          "여러 날짜에 걸쳐 비슷한 유형의 신호가 반복 승인됨.",
+          "유동 인구가 몰리는 시간대에 판매 압박이 눈에 띄게 늘어납니다.",
+          "금전 피해보다도 진로 방해 성격의 불편 신고가 많습니다.",
+          "여러 날짜에 걸쳐 비슷한 패턴이 반복 확인되었습니다.",
         ],
         recentReportCount: 5,
         path: [
@@ -245,26 +245,26 @@ export const cities: CityData[] = [
         ],
         placeSignals: [
           {
-            placeName: "Counterfeit accessory stalls",
+            placeName: "모조 액세서리 판매대",
             signalType: "가짜 상품 강매",
             signalScore: 8,
             evidence:
-              "단순 구경 뒤에도 구매 압박이 이어졌다는 리뷰 신호가 같은 블록에서 반복됩니다.",
+              "단순 구경 중에도 구매 압박이 이어졌다는 리뷰 신호가 같은 블록에서 반복되었습니다.",
           },
         ],
       },
       {
         id: "hanoi-ta-hien-entry",
-        name: "따히엔 입구 구간",
+        name: "타히엔 입구 구간",
         riskLevel: "Yellow",
         riskScore: 21,
         summary:
-          "야간 호객과 언어적 압박이 존재하지만, 과다요금형 피해보다는 불쾌감 중심 신호가 더 많습니다.",
+          "야간 호객과 언어적 압박이 존재하지만 과다요금보다는 불쾌감 중심의 신고가 많은 구간입니다.",
         topCategories: ["Aggressive touting", "Verbal harassment"],
         reasons: [
-          "재정 피해보다 반복 권유와 언어적 압박 신고가 중심임.",
-          "심야 시간대에 집중되지만 규모는 오렌지 구간보다 낮음.",
-          "경계는 필요하나 즉시 회피 수준은 아님.",
+          "사정 설명 뒤에도 계속 불러세웠다는 신고가 반복됩니다.",
+          "심야 시간대에 집중되지만 규모는 고위험 구간보다 낮습니다.",
+          "경계는 필요하지만 즉시 회피가 필요한 수준은 아닙니다.",
         ],
         recentReportCount: 2,
         path: [
@@ -276,11 +276,11 @@ export const cities: CityData[] = [
         ],
         placeSignals: [
           {
-            placeName: "Night entry promoters",
+            placeName: "야간 입구 호객 라인",
             signalType: "언어적 압박",
             signalScore: 4,
             evidence:
-              "거절 후에도 계속 부르거나 따라붙었다는 신고가 이 입구 구간에 집중됩니다.",
+              "거절 의사 이후에도 따라붙었다는 신고가 입구 짧은 구간에 집중됩니다.",
           },
         ],
       },
