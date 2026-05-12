@@ -258,206 +258,221 @@ export function Dashboard({ cities }: DashboardProps) {
   }
 
   const popupClass = popupExpanded
-    ? "w-[min(92vw,360px)] max-h-[54vh]"
-    : "w-[min(72vw,260px)] max-h-[132px]";
+    ? "w-[min(82vw,320px)] max-h-[50vh]"
+    : "w-[min(62vw,230px)] max-h-[120px]";
 
   return (
-    <main className="relative h-screen overflow-hidden bg-[#071019] text-white">
-      <div className="absolute inset-0 z-0">
-        <GoogleRiskMap
-          ref={mapRef}
-          city={activeCity}
-          selectedSegmentId={selectedSegment.id}
-          selectedProductId={matchedProduct?.id}
-          locale={locale}
-          onSelectSegment={handleSelectSegment}
-          onZoomLevelChange={setMapZoom}
-        />
-      </div>
-
-      <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(5,9,13,0.74)_0%,rgba(5,9,13,0.22)_18%,rgba(5,9,13,0)_36%,rgba(5,9,13,0.18)_100%)]" />
+    <main className="relative min-h-screen overflow-hidden bg-[#071019] text-white">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_16%,rgba(90,105,173,0.22),transparent_18%),radial-gradient(circle_at_82%_20%,rgba(30,193,163,0.16),transparent_18%),linear-gradient(180deg,#04070b_0%,#081018_55%,#04070a_100%)]" />
+      <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:84px_84px]" />
 
       <div className="absolute left-4 top-4 z-40 flex gap-2">
         <LocaleButton active={locale === "ko"} label="한" onClick={() => setLocale("ko")} />
         <LocaleButton active={locale === "en"} label="EN" onClick={() => setLocale("en")} />
       </div>
 
-      <div className="absolute inset-x-0 top-4 z-30 px-16 sm:px-24 lg:px-28">
-        <div className="mx-auto max-w-[980px] rounded-[1.5rem] border border-white/10 bg-[rgba(7,12,18,0.74)] px-3 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.32)] backdrop-blur-xl">
-          <div className="flex items-center justify-between gap-3 pb-2">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-white/54">
-                <span>{t.beta}</span>
-                <span className="h-1 w-1 rounded-full bg-white/24" />
-                <span>{t.mapTag}</span>
-              </div>
-              <p className="mt-1 text-sm font-semibold text-white/92">{locale === "ko" ? activeCity.label : activeCity.labelEn}</p>
-            </div>
-            <Link href="/admin" className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-[11px] text-white/76">{t.admin}</Link>
-          </div>
-
-          <div className="grid gap-2 lg:grid-cols-[1.15fr_1fr_auto]">
-            <div className="relative">
-              <TopSearchBox
-                value={citySearchQuery}
-                onChange={(value) => {
-                  setCitySearchQuery(value);
-                  setSearchOpen(true);
-                }}
-                onFocus={() => setSearchOpen(true)}
-                placeholder={t.citySearchPlaceholder}
-                label={t.searchLabel}
+      <section className="relative z-20 flex min-h-screen items-center justify-center px-4 py-8">
+        <IPhoneMockup>
+          <div className="relative h-full overflow-hidden bg-[#070d14] text-white">
+            <div className="absolute inset-0 z-0">
+              <GoogleRiskMap
+                ref={mapRef}
+                city={activeCity}
+                selectedSegmentId={selectedSegment.id}
+                selectedProductId={matchedProduct?.id}
+                locale={locale}
+                onSelectSegment={handleSelectSegment}
+                onZoomLevelChange={setMapZoom}
               />
-              {searchOpen ? (
-                <div className="absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-[1rem] border border-white/10 bg-[#0b121a] shadow-[0_20px_40px_rgba(0,0,0,0.32)]">
-                  {searchResults.length > 0 ? (
-                    <div className="max-h-48 overflow-y-auto p-2">
-                      {searchResults.map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => {
-                            if (item.supportedCityId) {
-                              selectCity(item.supportedCityId);
-                            } else {
-                              setSearchOpen(false);
-                              setCitySearchQuery(item.name);
-                            }
-                          }}
-                          className="flex w-full items-start justify-between rounded-[0.9rem] px-3 py-2.5 text-left hover:bg-white/6"
-                        >
-                          <div>
-                            <p className="text-sm font-medium text-white">{item.name}</p>
-                            <p className="mt-1 text-xs text-white/54">{item.region}, {item.country}</p>
-                          </div>
-                          <span className="text-[11px] text-white/44">{item.supportedCityId ? t.supported : t.unsupported}</span>
-                        </button>
-                      ))}
+            </div>
+
+            <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(5,9,13,0.82)_0%,rgba(5,9,13,0.28)_16%,rgba(5,9,13,0)_34%,rgba(5,9,13,0.18)_100%)]" />
+
+            <div className="relative z-30 flex items-center justify-between px-5 pb-1.5 pt-4 text-[12px] font-medium">
+              <span>9:41</span>
+              <div className="flex items-center gap-1.5 text-white/72">
+                <span className="h-2 w-2 rounded-full bg-white/75" />
+                <span className="h-2 w-2 rounded-full bg-white/75" />
+                <span className="h-2 w-2 rounded-full bg-white/75" />
+              </div>
+            </div>
+
+            <div className="relative z-30 px-3 pb-3">
+              <div className="rounded-[1.15rem] border border-white/10 bg-[rgba(7,12,18,0.78)] px-3 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+                <div className="flex items-center justify-between gap-3 pb-2">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-white/54">
+                      <span>{t.beta}</span>
+                      <span className="h-1 w-1 rounded-full bg-white/24" />
+                      <span>{t.mapTag}</span>
                     </div>
+                    <p className="mt-1 text-sm font-semibold text-white/92">{locale === "ko" ? activeCity.label : activeCity.labelEn}</p>
+                  </div>
+                  <Link href="/admin" className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-[11px] text-white/76">{t.admin}</Link>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="relative">
+                    <TopSearchBox
+                      value={citySearchQuery}
+                      onChange={(value) => {
+                        setCitySearchQuery(value);
+                        setSearchOpen(true);
+                      }}
+                      onFocus={() => setSearchOpen(true)}
+                      placeholder={t.citySearchPlaceholder}
+                      label={t.searchLabel}
+                    />
+                    {searchOpen ? (
+                      <div className="absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-[1rem] border border-white/10 bg-[#0b121a] shadow-[0_20px_40px_rgba(0,0,0,0.32)]">
+                        {searchResults.length > 0 ? (
+                          <div className="max-h-40 overflow-y-auto p-2">
+                            {searchResults.map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => {
+                                  if (item.supportedCityId) {
+                                    selectCity(item.supportedCityId);
+                                  } else {
+                                    setSearchOpen(false);
+                                    setCitySearchQuery(item.name);
+                                  }
+                                }}
+                                className="flex w-full items-start justify-between rounded-[0.9rem] px-3 py-2.5 text-left hover:bg-white/6"
+                              >
+                                <div>
+                                  <p className="text-sm font-medium text-white">{item.name}</p>
+                                  <p className="mt-1 text-xs text-white/54">{item.region}, {item.country}</p>
+                                </div>
+                                <span className="text-[11px] text-white/44">{item.supportedCityId ? t.supported : t.unsupported}</span>
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="px-4 py-4 text-sm text-white/58">{t.searchEmpty}</div>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <TopSearchBox value={itemQuery} onChange={setItemQuery} placeholder={t.itemSearchPlaceholder} label={t.itemLabel} />
+
+                  <div className="flex gap-2 overflow-x-auto pb-1">
+                    {cities.map((city) => (
+                      <button
+                        key={city.id}
+                        type="button"
+                        onClick={() => selectCity(city.id)}
+                        className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-medium transition ${city.id === activeCityId ? "bg-white text-stone-950" : "border border-white/12 bg-white/6 text-white/78"}`}
+                      >
+                        {locale === "ko" ? city.shortLabel : city.shortLabelEn}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {itemQuery.trim() ? (
+                  <div className="mt-2 rounded-[1rem] border border-white/8 bg-white/5 px-3 py-2 text-xs text-white/74">
+                    {matchedProduct ? (
+                      <>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-white">{locale === "ko" ? matchedProduct.name : matchedProduct.nameEn}</span>
+                          <span className="text-white/46">{t.itemAiMatched}</span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-white/60">{mapZoom >= zoomThreshold ? t.itemZoomReady : t.itemZoomHint}</p>
+                      </>
+                    ) : (
+                      <span className="text-white/60">{t.itemAiNoMatch}</span>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="absolute left-3 top-[172px] z-30 flex flex-wrap items-center gap-1.5">
+              <span className="rounded-full border border-white/10 bg-black/44 px-2.5 py-1 text-[10px] font-medium text-white/88 backdrop-blur-xl">
+                {locale === "ko" ? activeCity.shortLabel : activeCity.shortLabelEn}
+              </span>
+              <span
+                className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.2)]"
+                style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}
+              >
+                {locale === "ko" ? riskLabelMap[selectedSegment.riskLevel] : riskLabelMapEn[selectedSegment.riskLevel]}
+              </span>
+            </div>
+
+            <div className="absolute right-3 top-[170px] z-30 flex flex-col gap-2">
+              <MapButton label="+" onClick={() => mapRef.current?.zoomIn()} />
+              <MapButton label="-" onClick={() => mapRef.current?.zoomOut()} />
+            </div>
+
+            <div className="absolute bottom-3 left-3 z-30">
+              <div className={`overflow-hidden rounded-[1.2rem] border border-white/10 bg-[rgba(7,12,18,0.84)] shadow-[0_22px_44px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all duration-200 ${popupClass}`}>
+                <div className="flex items-center justify-between gap-2 border-b border-white/8 px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">{t.selectedRoad}</p>
+                    <p className="mt-1 truncate text-[12px] font-semibold tracking-[-0.03em] text-white">
+                      {locale === "ko" ? selectedSegment.name : selectedSegment.nameEn}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPopupTab(popupTab === "info" ? "report" : "info");
+                        setPopupExpanded(true);
+                      }}
+                      className="rounded-full border border-white/10 bg-white/6 px-2 py-1 text-[10px] text-white/76"
+                    >
+                      {popupTab === "info" ? t.popupReport : t.popupBack}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPopupExpanded((current) => !current)}
+                      className="rounded-full border border-white/10 bg-white/6 px-2 py-1 text-[10px] text-white/76"
+                    >
+                      {popupExpanded ? t.popupClose : t.popupOpen}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="px-3 py-2.5">
+                  {popupTab === "info" ? (
+                    popupExpanded ? (
+                      <InsightPanel
+                        city={activeCity}
+                        locale={locale}
+                        matchedProduct={matchedProduct}
+                        matchedStores={matchedStores}
+                        selectedSegment={selectedSegment}
+                        zoomLevel={mapZoom}
+                        zoomThreshold={zoomThreshold}
+                        getCategoryLabel={getCategoryLabel}
+                      />
+                    ) : (
+                      <CompactRoadPopup
+                        locale={locale}
+                        selectedSegment={selectedSegment}
+                        getCategoryLabel={getCategoryLabel}
+                      />
+                    )
                   ) : (
-                    <div className="px-4 py-4 text-sm text-white/58">{t.searchEmpty}</div>
+                    <ReportPanel
+                      city={activeCity}
+                      locale={locale}
+                      reportState={reportState}
+                      selectedSegment={selectedSegment}
+                      onSubmit={handleSubmit}
+                      compact
+                    />
                   )}
                 </div>
-              ) : null}
-            </div>
-
-            <div>
-              <TopSearchBox value={itemQuery} onChange={setItemQuery} placeholder={t.itemSearchPlaceholder} label={t.itemLabel} />
-            </div>
-
-            <div className="flex gap-2 overflow-x-auto pb-1 lg:justify-end">
-              {cities.map((city) => (
-                <button
-                  key={city.id}
-                  type="button"
-                  onClick={() => selectCity(city.id)}
-                  className={`shrink-0 rounded-full px-3 py-2 text-[11px] font-medium transition ${city.id === activeCityId ? "bg-white text-stone-950" : "border border-white/12 bg-white/6 text-white/78"}`}
-                >
-                  {locale === "ko" ? city.shortLabel : city.shortLabelEn}
-                </button>
-              ))}
+              </div>
             </div>
           </div>
-
-          {itemQuery.trim() ? (
-            <div className="mt-2 flex items-center justify-between gap-3 rounded-[1rem] border border-white/8 bg-white/5 px-3 py-2 text-xs text-white/74">
-              {matchedProduct ? (
-                <>
-                  <div className="min-w-0">
-                    <span className="mr-2 text-white/46">{t.itemAiMatched}</span>
-                    <span className="font-medium text-white">{locale === "ko" ? matchedProduct.name : matchedProduct.nameEn}</span>
-                  </div>
-                  <span className="shrink-0 text-white/62">{mapZoom >= zoomThreshold ? t.itemZoomReady : t.itemZoomHint}</span>
-                </>
-              ) : (
-                <span className="text-white/60">{t.itemAiNoMatch}</span>
-              )}
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      <div className="absolute left-4 top-28 z-30 flex flex-wrap items-center gap-1.5 sm:left-6 sm:top-32">
-        <span className="rounded-full border border-white/10 bg-black/44 px-2.5 py-1 text-[10px] font-medium text-white/88 backdrop-blur-xl">
-          {locale === "ko" ? activeCity.shortLabel : activeCity.shortLabelEn}
-        </span>
-        <span
-          className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.2)]"
-          style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}
-        >
-          {locale === "ko" ? riskLabelMap[selectedSegment.riskLevel] : riskLabelMapEn[selectedSegment.riskLevel]}
-        </span>
-        <span className="rounded-full border border-white/10 bg-black/44 px-2.5 py-1 text-[10px] text-white/82 backdrop-blur-xl">{t.cityOverlay}</span>
-      </div>
-
-      <div className="absolute right-4 top-28 z-30 flex flex-col gap-2 sm:right-6 sm:top-32">
-        <MapButton label="+" onClick={() => mapRef.current?.zoomIn()} />
-        <MapButton label="-" onClick={() => mapRef.current?.zoomOut()} />
-      </div>
-
-      <div className="absolute bottom-4 left-4 z-30 sm:bottom-6 sm:left-6">
-        <div className={`overflow-hidden rounded-[1.35rem] border border-white/10 bg-[rgba(7,12,18,0.82)] shadow-[0_22px_44px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all duration-200 ${popupClass}`}>
-          <div className="flex items-center justify-between gap-2 border-b border-white/8 px-3.5 py-3">
-            <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">{t.selectedRoad}</p>
-              <p className="mt-1 truncate text-[13px] font-semibold tracking-[-0.03em] text-white">
-                {locale === "ko" ? selectedSegment.name : selectedSegment.nameEn}
-              </p>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setPopupTab(popupTab === "info" ? "report" : "info");
-                  setPopupExpanded(true);
-                }}
-                className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[10px] text-white/76"
-              >
-                {popupTab === "info" ? t.popupReport : t.popupBack}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPopupExpanded((current) => !current)}
-                className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[10px] text-white/76"
-              >
-                {popupExpanded ? t.popupClose : t.popupOpen}
-              </button>
-            </div>
-          </div>
-
-          <div className="px-3.5 py-3">
-            {popupTab === "info" ? (
-              popupExpanded ? (
-                <InsightPanel
-                  city={activeCity}
-                  locale={locale}
-                  matchedProduct={matchedProduct}
-                  matchedStores={matchedStores}
-                  selectedSegment={selectedSegment}
-                  zoomLevel={mapZoom}
-                  zoomThreshold={zoomThreshold}
-                  getCategoryLabel={getCategoryLabel}
-                />
-              ) : (
-                <CompactRoadPopup
-                  locale={locale}
-                  selectedSegment={selectedSegment}
-                  getCategoryLabel={getCategoryLabel}
-                />
-              )
-            ) : (
-              <ReportPanel
-                city={activeCity}
-                locale={locale}
-                reportState={reportState}
-                selectedSegment={selectedSegment}
-                onSubmit={handleSubmit}
-                compact
-              />
-            )}
-          </div>
-        </div>
-      </div>
+        </IPhoneMockup>
+      </section>
     </main>
   );
 }
@@ -487,6 +502,20 @@ function TopSearchBox({
           placeholder={placeholder}
           className="mt-0.5 w-full bg-transparent text-[13px] text-white outline-none placeholder:text-white/32"
         />
+      </div>
+    </div>
+  );
+}
+
+function IPhoneMockup({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative w-full max-w-[min(90vw,390px)] shrink-0">
+      <div className="pointer-events-none absolute -inset-8 rounded-[4rem] bg-[radial-gradient(circle_at_50%_16%,rgba(59,130,246,0.16),transparent_22%),radial-gradient(circle_at_50%_84%,rgba(16,185,129,0.12),transparent_18%)] blur-3xl" />
+      <div className="relative rounded-[3rem] border border-white/12 bg-[#d2d6de] p-[8px] shadow-[0_40px_88px_rgba(0,0,0,0.46),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <div className="pointer-events-none absolute left-1/2 top-[14px] z-30 h-7 w-34 -translate-x-1/2 rounded-full bg-[#0a0f16]" />
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-[#070d14]">
+          <div className="aspect-[420/860] w-full">{children}</div>
+        </div>
       </div>
     </div>
   );
