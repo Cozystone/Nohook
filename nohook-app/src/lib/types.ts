@@ -56,3 +56,13 @@ export type ReportSubmissionResult = {
   moderationStatus: "received" | "under_review";
   reportReference: string;
 };
+
+export type GeoDbCitySuggestion = {
+  id: string;
+  name: string;
+  region: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  supportedCityId?: string;
+};
