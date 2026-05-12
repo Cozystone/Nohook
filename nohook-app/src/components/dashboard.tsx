@@ -130,6 +130,7 @@ type DashboardProps = {
 };
 
 type PopupTab = "info" | "report";
+type MapStyle = "satellite" | "roadmap";
 
 const initialReportState = {
   status: "idle" as "idle" | "submitting" | "success" | "error",
@@ -148,6 +149,7 @@ export function Dashboard({ cities }: DashboardProps) {
   const [searchResults, setSearchResults] = useState<GeoDbCitySuggestion[]>([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mapZoom, setMapZoom] = useState(15);
+  const [mapStyle, setMapStyle] = useState<MapStyle>("satellite");
   const mapRef = useRef<RiskMapHandle | null>(null);
   const t = uiCopy[locale];
 
@@ -270,6 +272,7 @@ export function Dashboard({ cities }: DashboardProps) {
                 selectedSegmentId={selectedSegment.id}
                 selectedProductId={matchedProduct?.id}
                 locale={locale}
+                mapStyle={mapStyle}
                 onSelectSegment={handleSelectSegment}
                 onZoomLevelChange={setMapZoom}
               />
@@ -381,6 +384,22 @@ export function Dashboard({ cities }: DashboardProps) {
             </div>
 
             <div className="absolute right-3 top-[168px] z-30 flex flex-col gap-2">
+              <div className="overflow-hidden rounded-[1rem] border border-white/12 bg-[rgba(17,20,27,0.56)] backdrop-blur-xl">
+                <button
+                  type="button"
+                  onClick={() => setMapStyle("satellite")}
+                  className={`block w-full px-3 py-2 text-[10px] font-medium transition ${mapStyle === "satellite" ? "bg-[#dbeafe] text-[#0f172a]" : "text-white/78"}`}
+                >
+                  {locale === "ko" ? "위성" : "Sat"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMapStyle("roadmap")}
+                  className={`block w-full border-t border-white/10 px-3 py-2 text-[10px] font-medium transition ${mapStyle === "roadmap" ? "bg-[#dbeafe] text-[#0f172a]" : "text-white/78"}`}
+                >
+                  {locale === "ko" ? "지도" : "Map"}
+                </button>
+              </div>
               <MapButton label="+" onClick={() => mapRef.current?.zoomIn()} />
               <MapButton label="-" onClick={() => mapRef.current?.zoomOut()} />
             </div>
@@ -706,3 +725,7 @@ function ReportPanel({
     </section>
   );
 }
+
+
+
+

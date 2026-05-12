@@ -23,6 +23,7 @@ type RiskMapProps = {
   selectedSegmentId: string;
   selectedProductId?: string;
   locale: AppLocale;
+  mapStyle: "satellite" | "roadmap";
   onSelectSegment: (id: string) => void;
   onZoomLevelChange?: (zoom: number) => void;
 };
@@ -39,7 +40,7 @@ const SHOP_CORRIDOR_ZOOM_THRESHOLD = 16;
 
 export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
   function GoogleRiskMap(
-    { city, selectedSegmentId, selectedProductId, locale, onSelectSegment, onZoomLevelChange },
+    { city, selectedSegmentId, selectedProductId, locale, mapStyle, onSelectSegment, onZoomLevelChange },
     ref,
   ) {
     const containerRef = useRef<HTMLDivElement | null>(null);
@@ -47,6 +48,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
     const segmentLayersRef = useRef<Map<string, LeafletType.Layer>>(new Map());
     const markerLayerRef = useRef<LeafletType.LayerGroup | null>(null);
     const priceLayerRef = useRef<LeafletType.LayerGroup | null>(null);
+    const baseLayersRef = useRef<LeafletType.Layer[]>([]);
     const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
     const [zoomLevel, setZoomLevel] = useState(15);
 
@@ -83,6 +85,49 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           onZoomLevelChange?.(nextZoom);
         });
 
+        setTimeout(() => {
+          map?.invalidateSize();
+        }, 0);
+      }
+
+      initMap();
+
+      return () => {
+        map?.remove();
+        mapRef.current = null;
+        segmentLayers.clear();
+        markerLayerRef.current = null;
+        priceLayerRef.current = null;
+        baseLayersRef.current = [];
+      };
+    }, [onZoomLevelChange]);
+
+    useEffect(() => {
+      if (!mapRef.current) return;
+      let cancelled = false;
+
+      async function syncBaseTiles() {
+        const L = await import("leaflet");
+        const leafletMap = mapRef.current;
+        if (cancelled || !leafletMap) return;
+
+        baseLayersRef.current.forEach((layer) => layer.remove());
+        baseLayersRef.current = [];
+        setLoadState("loading");
+
+        if (mapStyle === "roadmap") {
+          const roadLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            opacity: 0.94,
+            crossOrigin: true,
+          });
+          roadLayer.on("load", () => setLoadState("ready"));
+          roadLayer.on("tileerror", () => setLoadState("error"));
+          roadLayer.addTo(leafletMap);
+          baseLayersRef.current = [roadLayer];
+          return;
+        }
+
         const imageryLayer = L.tileLayer(
           "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
           {
@@ -108,24 +153,16 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           if (tileErrors > 4) setLoadState("error");
         });
 
-        imageryLayer.addTo(map);
-        labelLayer.addTo(map);
-
-        setTimeout(() => {
-          map?.invalidateSize();
-        }, 0);
+        imageryLayer.addTo(leafletMap);
+        labelLayer.addTo(leafletMap);
+        baseLayersRef.current = [imageryLayer, labelLayer];
       }
 
-      initMap();
-
+      syncBaseTiles();
       return () => {
-        map?.remove();
-        mapRef.current = null;
-        segmentLayers.clear();
-        markerLayerRef.current = null;
-        priceLayerRef.current = null;
+        cancelled = true;
       };
-    }, [onZoomLevelChange]);
+    }, [mapStyle]);
 
     useEffect(() => {
       if (!mapRef.current) return;
@@ -318,12 +355,20 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
     const statusLabel =
       loadState === "loading"
         ? locale === "ko"
-          ? "위성 지도를 불러오는 중"
-          : "Loading satellite map"
+          ? mapStyle === "satellite"
+            ? "위성 지도를 불러오는 중"
+            : "지도를 불러오는 중"
+          : mapStyle === "satellite"
+            ? "Loading satellite map"
+            : "Loading map"
         : loadState === "error"
           ? locale === "ko"
-            ? "위성 타일 로딩 실패, 데모 지도로 전환"
-            : "Satellite tiles failed, using demo map"
+            ? mapStyle === "satellite"
+              ? "위성 타일 로딩 실패, 데모 지도로 전환"
+              : "지도 타일 로딩 실패"
+            : mapStyle === "satellite"
+              ? "Satellite tiles failed, using demo map"
+              : "Map tiles failed"
           : selectedProductId && zoomLevel >= PRICE_ZOOM_THRESHOLD
             ? locale === "ko"
               ? "가게별 평균 가격 표시 중"
@@ -332,16 +377,20 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
               ? locale === "ko"
                 ? "상점 밀집 거리 레이어 표시 중"
                 : "Showing shop-street layer"
-            : locale === "ko"
-              ? "호객 위험 도로 색상 표시"
-              : "Showing tout-risk road colors";
+              : locale === "ko"
+                ? mapStyle === "satellite"
+                  ? "호객 위험 도로 색상 표시"
+                  : "일반 지도 위 위험 도로 표시"
+                : mapStyle === "satellite"
+                  ? "Showing tout-risk road colors"
+                  : "Showing risk roads on map";
 
     return (
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div ref={containerRef} className="phone-map absolute inset-0" />
         <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(7,12,18,0.06)_0%,rgba(7,12,18,0.14)_100%)]" />
 
-        {loadState === "error" ? (
+        {loadState === "error" && mapStyle === "satellite" ? (
           <FallbackSatelliteMap
             city={city}
             selectedSegmentId={selectedSegmentId}
