@@ -36,7 +36,7 @@ export type RiskMapHandle = {
 const FALLBACK_WIDTH = 1280;
 const FALLBACK_HEIGHT = 880;
 const PRICE_ZOOM_THRESHOLD = 17;
-const SHOP_CORRIDOR_ZOOM_THRESHOLD = 16;
+const SHOP_CORRIDOR_ZOOM_THRESHOLD = 14;
 
 export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
   function GoogleRiskMap(
@@ -299,14 +299,14 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           const keyBase = `shop-corridor-${corridor.id}`;
           const halo = L.polyline(latLngs, {
             color: shopCorridorPalette[corridor.level],
-            weight: 12,
-            opacity: 0.14,
+            weight: 14,
+            opacity: 0.18,
             interactive: false,
           }).addTo(leafletMap);
           const line = L.polyline(latLngs, {
             color: shopCorridorPalette[corridor.level],
-            weight: 4,
-            opacity: 0.96,
+            weight: 5,
+            opacity: 0.98,
             dashArray: "1 9",
             lineCap: "round",
             interactive: false,
@@ -396,7 +396,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
               : "Showing average prices by shop"
             : zoomLevel >= SHOP_CORRIDOR_ZOOM_THRESHOLD
               ? locale === "ko"
-                ? "상점 밀집 거리 레이어 표시 중"
+                ? "상점 밀집 거리와 위험 도로 표시 중"
                 : "Showing shop-street layer"
               : locale === "ko"
                 ? mapStyle === "satellite"
@@ -550,3 +550,4 @@ function toSmoothPath(points: Array<{ x: number; y: number }>) {
   path += ` T ${last.x} ${last.y}`;
   return path;
 }
+
