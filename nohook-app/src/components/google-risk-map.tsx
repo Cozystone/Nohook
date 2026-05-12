@@ -51,6 +51,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
     const baseLayersRef = useRef<LeafletType.Layer[]>([]);
     const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
     const [zoomLevel, setZoomLevel] = useState(15);
+    const [mapReady, setMapReady] = useState(false);
 
     useImperativeHandle(ref, () => ({
       zoomIn() {
@@ -77,6 +78,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
         });
 
         mapRef.current = map;
+        setMapReady(true);
         setZoomLevel(map.getZoom());
         onZoomLevelChange?.(map.getZoom());
         map.on("zoomend", () => {
@@ -162,7 +164,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
       return () => {
         cancelled = true;
       };
-    }, [mapStyle]);
+    }, [mapReady, mapStyle]);
 
     useEffect(() => {
       if (!mapRef.current) return;
@@ -521,3 +523,4 @@ function toSmoothPath(points: Array<{ x: number; y: number }>) {
   path += ` T ${last.x} ${last.y}`;
   return path;
 }
+
