@@ -4,6 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { riskPalette } from "@/lib/data";
 import type { CityData, LatLngPoint } from "@/lib/types";
 
+declare global {
+  interface Window {
+    gm_authFailure?: () => void;
+  }
+}
+
 type GoogleRiskMapProps = {
   city: CityData;
   selectedSegmentId: string;
@@ -33,8 +39,17 @@ export function GoogleRiskMap({
     }
 
     let active = true;
+    let errorTimer: ReturnType<typeof setTimeout> | null = null;
     const segmentLines = segmentLinesRef.current;
     const markers = markerRefs.current;
+    const previousAuthFailure = window.gm_authFailure;
+
+    window.gm_authFailure = () => {
+      if (active) {
+        setLoadState("error");
+      }
+      previousAuthFailure?.();
+    };
 
     async function loadMap() {
       try {
@@ -71,7 +86,21 @@ export function GoogleRiskMap({
           gestureHandling: "greedy",
         });
 
-        setLoadState("ready");
+        errorTimer = setTimeout(() => {
+          const hasMapError = Boolean(
+            containerRef.current?.querySelector(".gm-err-container") ||
+              containerRef.current?.textContent?.includes(
+                "Google 지도를 제대로 로드",
+              ) ||
+              containerRef.current?.textContent?.includes("Google Maps"),
+          );
+
+          if (active && hasMapError) {
+            setLoadState("error");
+          } else if (active) {
+            setLoadState("ready");
+          }
+        }, 1200);
       } catch {
         if (active) {
           setLoadState("error");
@@ -83,6 +112,10 @@ export function GoogleRiskMap({
 
     return () => {
       active = false;
+      if (errorTimer) {
+        clearTimeout(errorTimer);
+      }
+      window.gm_authFailure = previousAuthFailure;
       segmentLines.forEach((polyline) => polyline.setMap(null));
       segmentLines.clear();
       markers.forEach((marker) => marker.setMap(null));
@@ -169,7 +202,7 @@ export function GoogleRiskMap({
     loadState === "loading"
       ? "실제 위성 지도를 불러오는 중"
       : loadState === "error"
-        ? "위성 지도를 불러오지 못해 데모 지도로 표시 중"
+        ? "실제 지도 로딩에 실패해 데모 지도로 전환됨"
         : loadState === "missing-key"
           ? "API 키가 없어 데모 지도로 표시 중"
           : null;

@@ -20,7 +20,7 @@ import type {
 
 const riskCopy: Record<RiskLevel, string> = {
   Green: "비교적 안정",
-  Yellow: "경계 유지",
+  Yellow: "경계 필요",
   Orange: "반복 신고 감지",
   Red: "우회 권장",
 };
@@ -118,70 +118,68 @@ export function Dashboard({ cities }: DashboardProps) {
 
   return (
     <main className="min-h-screen bg-[#071019] text-white">
-      <section className="relative min-h-screen overflow-hidden">
-        <GoogleRiskMap
-          city={activeCity}
-          selectedSegmentId={selectedSegment.id}
-          onSelectSegment={setSelectedSegmentId}
-        />
-
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(4,8,12,0.82)_0%,rgba(4,8,12,0.28)_22%,rgba(4,8,12,0.04)_48%,rgba(4,8,12,0.72)_100%)]" />
-
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-4 pt-4">
-          <div className="pointer-events-auto flex w-full max-w-[1440px] items-start justify-between gap-3">
-            <TopSummary
-              activeCity={activeCity}
-              cities={cities}
-              activeCityId={activeCityId}
-              onChangeCity={(cityId) => {
-                const nextCity = cities.find((city) => city.id === cityId);
-                setActiveCityId(cityId);
-                setSelectedSegmentId(nextCity?.segments[0]?.id ?? "");
-              }}
+      <section className="mx-auto flex w-full max-w-[1440px] flex-col gap-5 px-4 py-4 lg:px-5">
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b141d] shadow-[0_24px_80px_rgba(0,0,0,0.34)]">
+          <div className="relative min-h-[68vh] sm:min-h-[72vh] lg:min-h-[78vh]">
+            <GoogleRiskMap
+              city={activeCity}
+              selectedSegmentId={selectedSegment.id}
+              onSelectSegment={setSelectedSegmentId}
             />
 
-            <div className="hidden items-center gap-3 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/82 shadow-[0_16px_40px_rgba(0,0,0,0.25)] backdrop-blur-xl lg:flex">
-              <CompactStat label="모니터링" value={totals.monitoredRoads.toString()} />
-              <CompactStat label="고위험" value={totals.highRiskCount.toString()} />
-              <CompactStat label="최근 신고" value={totals.totalReports.toString()} />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(6,10,15,0.65)_0%,rgba(6,10,15,0.24)_18%,rgba(6,10,15,0.08)_48%,rgba(6,10,15,0.5)_100%)]" />
+
+            <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center px-3 pt-3 sm:px-4 sm:pt-4">
+              <div className="pointer-events-auto flex w-full max-w-[1380px] flex-col gap-3">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                  <HeaderCard
+                    activeCity={activeCity}
+                    cities={cities}
+                    activeCityId={activeCityId}
+                    onChangeCity={(cityId) => {
+                      const nextCity = cities.find((city) => city.id === cityId);
+                      setActiveCityId(cityId);
+                      setSelectedSegmentId(nextCity?.segments[0]?.id ?? "");
+                    }}
+                  />
+
+                  <div className="grid grid-cols-3 gap-2 self-start rounded-[1.5rem] border border-white/10 bg-black/38 p-2 backdrop-blur-xl">
+                    <CompactStat label="모니터링" value={totals.monitoredRoads.toString()} />
+                    <CompactStat label="고위험" value={totals.highRiskCount.toString()} />
+                    <CompactStat label="최근 신고" value={totals.totalReports.toString()} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-3 pb-3 sm:px-4 sm:pb-4">
+              <div className="pointer-events-auto w-full max-w-[1380px]">
+                <SelectedBar segment={selectedSegment} city={activeCity} />
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex justify-center px-0 pb-0 md:px-4 md:pb-4">
-          <div className="pointer-events-auto flex w-full max-w-[1440px] flex-col gap-4 md:flex-row md:items-end md:justify-between">
-            <div className="mx-0 w-full rounded-t-[2rem] border border-white/10 bg-[rgba(7,12,18,0.82)] p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.18)] backdrop-blur-xl md:mx-0 md:max-w-[28rem] md:rounded-[2rem] md:p-5">
-              <SegmentCard segment={selectedSegment} city={activeCity} />
-            </div>
-
-            <div className="hidden w-full max-w-[24rem] rounded-[2rem] border border-white/10 bg-[rgba(7,12,18,0.82)] p-5 shadow-[0_16px_50px_rgba(0,0,0,0.28)] backdrop-blur-xl lg:block">
-              <ReportPanel
-                city={activeCity}
-                selectedSegment={selectedSegment}
-                reportState={reportState}
-                onSubmit={handleSubmit}
-                compact
-              />
-            </div>
+        <section className="grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(360px,420px)]">
+          <div className="rounded-[2rem] border border-white/10 bg-[#0b141d] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.24)]">
+            <SegmentCard segment={selectedSegment} city={activeCity} />
           </div>
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-[1440px] px-4 pb-10 pt-4 lg:hidden">
-        <div className="rounded-[2rem] border border-white/10 bg-[#0b141d] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.24)]">
-          <ReportPanel
-            city={activeCity}
-            selectedSegment={selectedSegment}
-            reportState={reportState}
-            onSubmit={handleSubmit}
-          />
-        </div>
+          <div className="rounded-[2rem] border border-white/10 bg-[#0b141d] p-5 shadow-[0_16px_40px_rgba(0,0,0,0.24)]">
+            <ReportPanel
+              city={activeCity}
+              selectedSegment={selectedSegment}
+              reportState={reportState}
+              onSubmit={handleSubmit}
+            />
+          </div>
+        </section>
       </section>
     </main>
   );
 }
 
-function TopSummary({
+function HeaderCard({
   activeCity,
   cities,
   activeCityId,
@@ -193,8 +191,8 @@ function TopSummary({
   onChangeCity: (cityId: string) => void;
 }) {
   return (
-    <div className="w-full max-w-[42rem] rounded-[2rem] border border-white/10 bg-black/42 px-4 py-4 shadow-[0_18px_48px_rgba(0,0,0,0.26)] backdrop-blur-xl sm:px-5">
-      <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/70">
+    <div className="max-w-[44rem] rounded-[1.75rem] border border-white/10 bg-black/40 px-4 py-4 backdrop-blur-xl sm:px-5">
+      <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-white/72">
         <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1">
           Nohook beta
         </span>
@@ -204,14 +202,14 @@ function TopSummary({
       </div>
 
       <h1 className="mt-4 text-2xl font-semibold tracking-[-0.05em] text-white sm:text-4xl">
-        실제 지도 위에서
+        지도는 크게 두고
         <br />
-        위험 도로만 먼저 보이게
+        정보는 아래로 정리했습니다
       </h1>
 
-      <p className="mt-3 max-w-2xl text-sm leading-6 text-white/76 sm:text-base">
-        호객, 시클로 과다요금, 사진 유도 후 팁 강요, 가짜 택시 신호를 도로
-        단위로 요약해 보여줍니다.
+      <p className="mt-3 max-w-2xl text-sm leading-6 text-white/74 sm:text-base">
+        실제 위성 지도 로드에 실패하면 데모 지도로 즉시 전환합니다. 현재는 도로
+        색상과 위험 구간 선택에 집중한 화면입니다.
       </p>
 
       <div className="mt-4 flex flex-wrap gap-2">
@@ -231,38 +229,54 @@ function TopSummary({
         ))}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/72">
-        <LegendBadge color={riskPalette.Red} label="고위험" />
-        <LegendBadge color={riskPalette.Orange} label="반복 신고" />
-        <LegendBadge color={riskPalette.Yellow} label="주의" />
-      </div>
-
-      <p className="mt-4 text-sm text-white/60">{activeCity.subtitle}</p>
+      <p className="mt-4 text-sm text-white/58">{activeCity.subtitle}</p>
     </div>
-  );
-}
-
-function LegendBadge({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2">
-      <span
-        className="h-2.5 w-2.5 rounded-full"
-        style={{ backgroundColor: color }}
-      />
-      {label}
-    </span>
   );
 }
 
 function CompactStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-[84px]">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-white/54">
+    <div className="min-w-[88px] rounded-[1rem] bg-white/6 px-3 py-2">
+      <p className="text-[11px] uppercase tracking-[0.14em] text-white/50">
         {label}
       </p>
-      <p className="mt-1 text-2xl font-semibold tracking-[-0.04em] text-white">
-        {value}
-      </p>
+      <p className="mt-1 text-xl font-semibold text-white">{value}</p>
+    </div>
+  );
+}
+
+function SelectedBar({
+  segment,
+  city,
+}: {
+  segment: RoadSegment;
+  city: CityData;
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-[rgba(7,12,18,0.8)] px-4 py-4 backdrop-blur-xl md:flex-row md:items-center md:justify-between">
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-white/56">
+          <span>{city.label}</span>
+          <span className="h-1 w-1 rounded-full bg-white/30" />
+          <span>선택된 도로</span>
+        </div>
+        <h2 className="mt-1 truncate text-xl font-semibold tracking-[-0.03em] text-white">
+          {segment.name}
+        </h2>
+        <p className="mt-1 line-clamp-2 text-sm text-white/68">{segment.summary}</p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className="rounded-full px-3 py-1 text-xs font-semibold text-white"
+          style={{ backgroundColor: riskPalette[segment.riskLevel] }}
+        >
+          {riskLabelMap[segment.riskLevel]}
+        </span>
+        <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1 text-xs text-white/76">
+          최근 신고 {segment.recentReportCount}건
+        </span>
+      </div>
     </div>
   );
 }
@@ -276,10 +290,10 @@ function SegmentCard({
 }) {
   return (
     <div>
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-white/52">
-            선택된 도로
+          <p className="text-[11px] uppercase tracking-[0.2em] text-white/52">
+            도로 상세
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">
             {segment.name}
@@ -287,30 +301,32 @@ function SegmentCard({
           <p className="mt-1 text-sm text-white/60">{city.label}</p>
         </div>
 
-        <span
-          className="rounded-full px-3 py-1 text-xs font-semibold text-white"
-          style={{ backgroundColor: riskPalette[segment.riskLevel] }}
-        >
-          {riskLabelMap[segment.riskLevel]}
-        </span>
+        <div className="flex flex-wrap gap-2">
+          <span
+            className="rounded-full px-3 py-1 text-xs font-semibold text-white"
+            style={{ backgroundColor: riskPalette[segment.riskLevel] }}
+          >
+            {riskLabelMap[segment.riskLevel]}
+          </span>
+          <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1 text-xs text-white/78">
+            {riskCopy[segment.riskLevel]}
+          </span>
+        </div>
       </div>
 
       <p className="mt-4 text-sm leading-6 text-white/78">{segment.summary}</p>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <InfoMetric label="위험 점수" value={segment.riskScore.toString()} />
-        <InfoMetric label="판단" value={riskCopy[segment.riskLevel]} />
-        <InfoMetric
-          label="최근 신고"
-          value={`${segment.recentReportCount}건`}
-        />
+        <InfoMetric label="최근 신고" value={`${segment.recentReportCount}건`} />
         <InfoMetric
           label="주요 유형"
           value={categoryLabelMap[segment.topCategories[0]]}
         />
+        <InfoMetric label="판단" value={riskCopy[segment.riskLevel]} />
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-5 flex flex-wrap gap-2">
         {segment.topCategories.map((category) => (
           <span
             key={category}
@@ -321,19 +337,22 @@ function SegmentCard({
         ))}
       </div>
 
-      <div className="mt-5 space-y-2">
+      <div className="mt-6 grid gap-3">
         {segment.placeSignals.map((signal) => (
           <div
             key={signal.placeName}
-            className="rounded-[1.2rem] border border-white/8 bg-white/5 px-4 py-3"
+            className="rounded-[1.25rem] border border-white/8 bg-white/5 px-4 py-4"
           >
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-white">{signal.placeName}</p>
-              <span className="text-xs text-white/54">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-white">{signal.placeName}</p>
+                <p className="mt-1 text-sm text-white/60">{signal.signalType}</p>
+              </div>
+              <span className="rounded-full border border-white/10 bg-white/6 px-3 py-1 text-xs text-white/72">
                 신호 {signal.signalScore}
               </span>
             </div>
-            <p className="mt-1 text-sm text-white/62">{signal.signalType}</p>
+            <p className="mt-3 text-sm leading-6 text-white/72">{signal.evidence}</p>
           </div>
         ))}
       </div>
@@ -355,7 +374,6 @@ function ReportPanel({
   selectedSegment,
   reportState,
   onSubmit,
-  compact = false,
 }: {
   city: CityData;
   selectedSegment: RoadSegment;
@@ -364,7 +382,6 @@ function ReportPanel({
     message: string;
   };
   onSubmit: (formData: FormData) => Promise<void>;
-  compact?: boolean;
 }) {
   return (
     <section>
@@ -388,7 +405,7 @@ function ReportPanel({
         </Link>
       </div>
 
-      <form action={onSubmit} className={`space-y-4 ${compact ? "mt-4" : "mt-5"}`}>
+      <form action={onSubmit} className="mt-5 space-y-4">
         <input type="hidden" name="segmentId" value={selectedSegment.id} />
 
         <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-4">
@@ -452,7 +469,7 @@ function ReportPanel({
           <span className="text-sm font-medium text-white/82">상황 메모</span>
           <textarea
             name="note"
-            rows={compact ? 4 : 5}
+            rows={5}
             placeholder="예: 시클로 기사가 처음에는 10만동이라고 했지만 도착 후 50만동을 요구했습니다."
             className="w-full rounded-[1.4rem] border border-white/12 bg-white/8 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/34 focus:border-white/40"
           />
