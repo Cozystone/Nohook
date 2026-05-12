@@ -47,6 +47,8 @@ const riskCopy: Record<AppLocale, Record<RiskLevel, string>> = {
 
 const zoomThreshold = 17;
 
+const glassPanel = "border border-white/12 bg-[linear-gradient(180deg,rgba(20,24,31,0.66)_0%,rgba(12,16,22,0.52)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-2xl";
+
 const uiCopy = {
   ko: {
     beta: "Nohook beta",
@@ -87,8 +89,8 @@ const uiCopy = {
     itemLabel: "물건",
     popupOpen: "열기",
     popupClose: "닫기",
-    popupReport: "신고 열기",
-    popupBack: "정보로",
+    popupReport: "신고",
+    popupBack: "정보",
   },
   en: {
     beta: "Nohook beta",
@@ -130,7 +132,7 @@ const uiCopy = {
     popupOpen: "Open",
     popupClose: "Close",
     popupReport: "Report",
-    popupBack: "Back",
+    popupBack: "Info",
   },
 } as const;
 
@@ -258,8 +260,8 @@ export function Dashboard({ cities }: DashboardProps) {
   }
 
   const popupClass = popupExpanded
-    ? "w-[min(82vw,320px)] max-h-[50vh]"
-    : "w-[min(62vw,230px)] max-h-[120px]";
+    ? "w-[min(82vw,320px)] max-h-[46vh]"
+    : "w-[min(60vw,222px)] max-h-[112px]";
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#071019] text-white">
@@ -286,7 +288,7 @@ export function Dashboard({ cities }: DashboardProps) {
               />
             </div>
 
-            <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(5,9,13,0.82)_0%,rgba(5,9,13,0.28)_16%,rgba(5,9,13,0)_34%,rgba(5,9,13,0.18)_100%)]" />
+            <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(5,9,13,0.68)_0%,rgba(5,9,13,0.2)_18%,rgba(5,9,13,0)_36%,rgba(5,9,13,0.16)_100%)]" />
 
             <div className="relative z-30 flex items-center justify-between px-5 pb-1.5 pt-4 text-[12px] font-medium">
               <span>9:41</span>
@@ -298,17 +300,17 @@ export function Dashboard({ cities }: DashboardProps) {
             </div>
 
             <div className="relative z-30 px-3 pb-3">
-              <div className="rounded-[1.15rem] border border-white/10 bg-[rgba(7,12,18,0.78)] px-3 py-3 shadow-[0_18px_50px_rgba(0,0,0,0.32)] backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-3 pb-2">
+              <div className={`rounded-[1.35rem] px-3 py-3 ${glassPanel}`}>
+                <div className="flex items-center justify-between gap-3 pb-2.5">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-white/54">
                       <span>{t.beta}</span>
                       <span className="h-1 w-1 rounded-full bg-white/24" />
                       <span>{t.mapTag}</span>
                     </div>
-                    <p className="mt-1 text-sm font-semibold text-white/92">{locale === "ko" ? activeCity.label : activeCity.labelEn}</p>
+                    <p className="mt-1.5 text-sm font-semibold text-white/94">{locale === "ko" ? activeCity.label : activeCity.labelEn}</p>
                   </div>
-                  <Link href="/admin" className="rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-[11px] text-white/76">{t.admin}</Link>
+                  <Link href="/admin" className="rounded-full border border-white/12 bg-white/8 px-3 py-1.5 text-[11px] text-white/78">{t.admin}</Link>
                 </div>
 
                 <div className="space-y-2">
@@ -324,7 +326,7 @@ export function Dashboard({ cities }: DashboardProps) {
                       label={t.searchLabel}
                     />
                     {searchOpen ? (
-                      <div className="absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-[1rem] border border-white/10 bg-[#0b121a] shadow-[0_20px_40px_rgba(0,0,0,0.32)]">
+                      <div className={`absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-[1rem] ${glassPanel}`}>
                         {searchResults.length > 0 ? (
                           <div className="max-h-40 overflow-y-auto p-2">
                             {searchResults.map((item) => (
@@ -339,7 +341,7 @@ export function Dashboard({ cities }: DashboardProps) {
                                     setCitySearchQuery(item.name);
                                   }
                                 }}
-                                className="flex w-full items-start justify-between rounded-[0.9rem] px-3 py-2.5 text-left hover:bg-white/6"
+                                className="flex w-full items-start justify-between rounded-[0.9rem] px-3 py-2.5 text-left transition hover:bg-white/8"
                               >
                                 <div>
                                   <p className="text-sm font-medium text-white">{item.name}</p>
@@ -364,7 +366,7 @@ export function Dashboard({ cities }: DashboardProps) {
                         key={city.id}
                         type="button"
                         onClick={() => selectCity(city.id)}
-                        className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-medium transition ${city.id === activeCityId ? "bg-white text-stone-950" : "border border-white/12 bg-white/6 text-white/78"}`}
+                        className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-medium transition ${city.id === activeCityId ? "bg-white text-stone-950" : "border border-white/12 bg-white/8 text-white/80"}`}
                       >
                         {locale === "ko" ? city.shortLabel : city.shortLabelEn}
                       </button>
@@ -373,7 +375,7 @@ export function Dashboard({ cities }: DashboardProps) {
                 </div>
 
                 {itemQuery.trim() ? (
-                  <div className="mt-2 rounded-[1rem] border border-white/8 bg-white/5 px-3 py-2 text-xs text-white/74">
+                  <div className="mt-2 rounded-[1rem] border border-white/10 bg-white/8 px-3 py-2 text-xs text-white/74 backdrop-blur-xl">
                     {matchedProduct ? (
                       <>
                         <div className="flex items-center justify-between gap-2">
@@ -390,8 +392,8 @@ export function Dashboard({ cities }: DashboardProps) {
               </div>
             </div>
 
-            <div className="absolute left-3 top-[172px] z-30 flex flex-wrap items-center gap-1.5">
-              <span className="rounded-full border border-white/10 bg-black/44 px-2.5 py-1 text-[10px] font-medium text-white/88 backdrop-blur-xl">
+            <div className="absolute left-3 top-[176px] z-30 flex flex-wrap items-center gap-1.5">
+              <span className="rounded-full border border-white/12 bg-black/32 px-2.5 py-1 text-[10px] font-medium text-white/90 backdrop-blur-xl">
                 {locale === "ko" ? activeCity.shortLabel : activeCity.shortLabelEn}
               </span>
               <span
@@ -402,14 +404,14 @@ export function Dashboard({ cities }: DashboardProps) {
               </span>
             </div>
 
-            <div className="absolute right-3 top-[170px] z-30 flex flex-col gap-2">
+            <div className="absolute right-3 top-[174px] z-30 flex flex-col gap-2">
               <MapButton label="+" onClick={() => mapRef.current?.zoomIn()} />
               <MapButton label="-" onClick={() => mapRef.current?.zoomOut()} />
             </div>
 
             <div className="absolute bottom-3 left-3 z-30">
-              <div className={`overflow-hidden rounded-[1.2rem] border border-white/10 bg-[rgba(7,12,18,0.84)] shadow-[0_22px_44px_rgba(0,0,0,0.34)] backdrop-blur-xl transition-all duration-200 ${popupClass}`}>
-                <div className="flex items-center justify-between gap-2 border-b border-white/8 px-3 py-2.5">
+              <div className={`overflow-hidden rounded-[1.25rem] ${glassPanel} transition-all duration-200 ${popupClass}`}>
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-2.5">
                   <div className="min-w-0">
                     <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">{t.selectedRoad}</p>
                     <p className="mt-1 truncate text-[12px] font-semibold tracking-[-0.03em] text-white">
@@ -423,14 +425,14 @@ export function Dashboard({ cities }: DashboardProps) {
                         setPopupTab(popupTab === "info" ? "report" : "info");
                         setPopupExpanded(true);
                       }}
-                      className="rounded-full border border-white/10 bg-white/6 px-2 py-1 text-[10px] text-white/76"
+                      className="rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[10px] text-white/78"
                     >
                       {popupTab === "info" ? t.popupReport : t.popupBack}
                     </button>
                     <button
                       type="button"
                       onClick={() => setPopupExpanded((current) => !current)}
-                      className="rounded-full border border-white/10 bg-white/6 px-2 py-1 text-[10px] text-white/76"
+                      className="rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[10px] text-white/78"
                     >
                       {popupExpanded ? t.popupClose : t.popupOpen}
                     </button>
@@ -491,8 +493,8 @@ function TopSearchBox({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-[1rem] border border-white/10 bg-white/6 px-3 py-2.5">
-      <span className="text-sm text-white/42">⌕</span>
+    <div className="flex items-center gap-2 rounded-[1rem] border border-white/12 bg-white/8 px-3 py-2.5 backdrop-blur-xl">
+      <span className="text-sm text-white/40">⌕</span>
       <div className="min-w-0 flex-1">
         <p className="text-[9px] uppercase tracking-[0.16em] text-white/34">{label}</p>
         <input
@@ -509,12 +511,12 @@ function TopSearchBox({
 
 function IPhoneMockup({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-full max-w-[min(90vw,390px)] shrink-0">
-      <div className="pointer-events-none absolute -inset-8 rounded-[4rem] bg-[radial-gradient(circle_at_50%_16%,rgba(59,130,246,0.16),transparent_22%),radial-gradient(circle_at_50%_84%,rgba(16,185,129,0.12),transparent_18%)] blur-3xl" />
-      <div className="relative rounded-[3rem] border border-white/12 bg-[#d2d6de] p-[8px] shadow-[0_40px_88px_rgba(0,0,0,0.46),0_0_0_1px_rgba(255,255,255,0.08)]">
-        <div className="pointer-events-none absolute left-1/2 top-[14px] z-30 h-7 w-34 -translate-x-1/2 rounded-full bg-[#0a0f16]" />
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-[#070d14]">
-          <div className="aspect-[420/860] w-full">{children}</div>
+    <div className="relative w-full max-w-[min(92vw,400px)] shrink-0">
+      <div className="pointer-events-none absolute -inset-8 rounded-[4rem] bg-[radial-gradient(circle_at_50%_16%,rgba(59,130,246,0.14),transparent_24%),radial-gradient(circle_at_50%_84%,rgba(16,185,129,0.12),transparent_18%)] blur-3xl" />
+      <div className="relative rounded-[3rem] border border-white/12 bg-[#d6dae2] p-[8px] shadow-[0_40px_88px_rgba(0,0,0,0.44),0_0_0_1px_rgba(255,255,255,0.08)]">
+        <div className="pointer-events-none absolute left-1/2 top-[14px] z-30 h-7 w-34 -translate-x-1/2 rounded-full bg-[#0a0f16] opacity-95" />
+        <div className="relative overflow-hidden rounded-[2.45rem] bg-[#070d14]">
+          <div className="aspect-[430/820] w-full">{children}</div>
         </div>
       </div>
     </div>
@@ -538,7 +540,7 @@ function MapButton({ label, onClick }: { label: string; onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-9 w-9 items-center justify-center rounded-[1rem] border border-white/10 bg-black/48 text-[16px] font-semibold text-white shadow-[0_10px_20px_rgba(0,0,0,0.24)] backdrop-blur-xl"
+      className="flex h-9 w-9 items-center justify-center rounded-[1rem] border border-white/12 bg-[rgba(17,20,27,0.54)] text-[16px] font-semibold text-white shadow-[0_10px_20px_rgba(0,0,0,0.22)] backdrop-blur-xl"
     >
       {label}
     </button>
@@ -564,7 +566,7 @@ function CompactRoadPopup({
       </div>
       <div className="flex flex-wrap gap-1.5">
         {selectedSegment.topCategories.slice(0, 3).map((category) => (
-          <span key={category} className="rounded-full border border-white/10 bg-white/6 px-2 py-1 text-[10px] text-white/78">
+          <span key={category} className="rounded-full border border-white/12 bg-white/8 px-2 py-1 text-[10px] text-white/78 backdrop-blur-xl">
             {getCategoryLabel(category)}
           </span>
         ))}
@@ -603,21 +605,21 @@ function InsightPanel({
       </div>
       <div className="flex flex-wrap gap-2">
         {selectedSegment.topCategories.map((category) => (
-          <span key={category} className="rounded-full border border-white/10 bg-white/6 px-2.5 py-1.5 text-[10px] text-white/78">
+          <span key={category} className="rounded-full border border-white/12 bg-white/8 px-2.5 py-1.5 text-[10px] text-white/78 backdrop-blur-xl">
             {getCategoryLabel(category)}
           </span>
         ))}
       </div>
-      <div className="rounded-[1rem] border border-white/8 bg-white/5 px-3 py-2.5 text-xs leading-5 text-white/68">
+      <div className="rounded-[1rem] border border-white/10 bg-white/8 px-3 py-2.5 text-xs leading-5 text-white/68 backdrop-blur-xl">
         {locale === "ko" ? selectedSegment.summary : selectedSegment.summaryEn}
         <br />
         {t.trackingArea}: {locale === "ko" ? city.label : city.labelEn}
       </div>
       {matchedProduct ? (
-        <div className="rounded-[1rem] border border-white/8 bg-white/5 px-3 py-2.5">
+        <div className="rounded-[1rem] border border-white/10 bg-white/8 px-3 py-2.5 backdrop-blur-xl">
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm font-medium text-white">{locale === "ko" ? matchedProduct.name : matchedProduct.nameEn}</p>
-            <span className="rounded-full border border-white/10 bg-white/6 px-2 py-1 text-[11px] text-white/72">
+            <span className="rounded-full border border-white/10 bg-white/10 px-2 py-1 text-[11px] text-white/72">
               {matchedStores.length} {t.shopsFound}
             </span>
           </div>
@@ -627,7 +629,7 @@ function InsightPanel({
               const price = getStoreProductPrice(store, matchedProduct.id);
               if (!price) return null;
               return (
-                <div key={store.id} className="rounded-[0.95rem] border border-white/8 bg-black/20 px-3 py-2">
+                <div key={store.id} className="rounded-[0.95rem] border border-white/10 bg-black/14 px-3 py-2 backdrop-blur-xl">
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-white">{locale === "ko" ? store.name : store.nameEn}</p>
@@ -649,7 +651,7 @@ function InsightPanel({
 
 function InfoMetricCompact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[0.95rem] border border-white/8 bg-white/5 px-2.5 py-2">
+    <div className="rounded-[0.95rem] border border-white/10 bg-white/8 px-2.5 py-2 backdrop-blur-xl">
       <p className="text-[10px] uppercase tracking-[0.12em] text-white/46">{label}</p>
       <p className="mt-1.5 line-clamp-2 text-[12px] font-medium leading-4 text-white">{value}</p>
     </div>
@@ -680,7 +682,7 @@ function ReportPanel({
   const travelers = locale === "ko" ? travelerTypeLabelMap : travelerTypeLabelMapEn;
   return (
     <section className="space-y-3">
-      <div className={`rounded-[1rem] border border-white/10 bg-white/6 ${compact ? "p-3" : "p-4"}`}>
+      <div className={`rounded-[1rem] border border-white/10 bg-white/8 backdrop-blur-xl ${compact ? "p-3" : "p-4"}`}>
         <p className="text-[11px] uppercase tracking-[0.12em] text-white/46">{t.selectSegment}</p>
         <p className="mt-2 text-sm font-semibold">{locale === "ko" ? selectedSegment.name : selectedSegment.nameEn}</p>
         <p className="mt-1 text-xs text-white/60">{locale === "ko" ? city.label : city.labelEn}</p>
@@ -689,7 +691,7 @@ function ReportPanel({
         <input type="hidden" name="segmentId" value={selectedSegment.id} />
         <label className="block space-y-2">
           <span className="text-xs font-medium text-white/82">{t.reportType}</span>
-          <select name="category" defaultValue={selectedSegment.topCategories[0]} className="w-full rounded-2xl border border-white/12 bg-white/8 px-3 py-2.5 text-sm text-white outline-none focus:border-white/36">
+          <select name="category" defaultValue={selectedSegment.topCategories[0]} className="w-full rounded-2xl border border-white/12 bg-white/8 px-3 py-2.5 text-sm text-white outline-none backdrop-blur-xl focus:border-white/36">
             {Object.entries(categories).map(([category, label]) => (
               <option key={category} value={category} className="text-stone-950">
                 {label}
@@ -700,7 +702,7 @@ function ReportPanel({
         <div className="grid grid-cols-2 gap-3">
           <label className="block space-y-2">
             <span className="text-xs font-medium text-white/82">{t.incidentTime}</span>
-            <select name="incidentTimeBucket" defaultValue="Evening" className="w-full rounded-2xl border border-white/12 bg-white/8 px-3 py-2.5 text-sm text-white outline-none focus:border-white/36">
+            <select name="incidentTimeBucket" defaultValue="Evening" className="w-full rounded-2xl border border-white/12 bg-white/8 px-3 py-2.5 text-sm text-white outline-none backdrop-blur-xl focus:border-white/36">
               {Object.entries(times).map(([value, label]) => (
                 <option key={value} value={value} className="text-stone-950">
                   {label}
@@ -710,7 +712,7 @@ function ReportPanel({
           </label>
           <label className="block space-y-2">
             <span className="text-xs font-medium text-white/82">{t.travelerType}</span>
-            <select name="travelerType" defaultValue="Solo traveler" className="w-full rounded-2xl border border-white/12 bg-white/8 px-3 py-2.5 text-sm text-white outline-none focus:border-white/36">
+            <select name="travelerType" defaultValue="Solo traveler" className="w-full rounded-2xl border border-white/12 bg-white/8 px-3 py-2.5 text-sm text-white outline-none backdrop-blur-xl focus:border-white/36">
               {Object.entries(travelers).map(([value, label]) => (
                 <option key={value} value={value} className="text-stone-950">
                   {label}
@@ -721,7 +723,7 @@ function ReportPanel({
         </div>
         <label className="block space-y-2">
           <span className="text-xs font-medium text-white/82">{t.note}</span>
-          <textarea name="note" rows={compact ? 3 : 4} placeholder={t.notePlaceholder} className="w-full rounded-[1.1rem] border border-white/12 bg-white/8 px-3 py-2.5 text-sm leading-5 text-white outline-none placeholder:text-white/34 focus:border-white/36" />
+          <textarea name="note" rows={compact ? 3 : 4} placeholder={t.notePlaceholder} className="w-full rounded-[1.1rem] border border-white/12 bg-white/8 px-3 py-2.5 text-sm leading-5 text-white outline-none placeholder:text-white/34 backdrop-blur-xl focus:border-white/36" />
         </label>
         <button type="submit" disabled={reportState.status === "submitting"} className="w-full rounded-full bg-white px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-stone-200 disabled:cursor-not-allowed disabled:opacity-70">
           {reportState.status === "submitting" ? t.reportSubmitting : t.reportSubmit}
