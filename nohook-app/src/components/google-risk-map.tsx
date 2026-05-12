@@ -14,8 +14,9 @@ import {
   formatPrice,
   getStoreProductPrice,
   riskPalette,
+  shopCorridorPalette,
 } from "@/lib/data";
-import type { AppLocale, CityData, LatLngPoint } from "@/lib/types";
+import type { AppLocale, CityData, LatLngPoint, ShopCorridor } from "@/lib/types";
 
 type RiskMapProps = {
   city: CityData;
@@ -34,6 +35,7 @@ export type RiskMapHandle = {
 const FALLBACK_WIDTH = 1280;
 const FALLBACK_HEIGHT = 880;
 const PRICE_ZOOM_THRESHOLD = 17;
+const SHOP_CORRIDOR_ZOOM_THRESHOLD = 16;
 
 export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
   function GoogleRiskMap(
@@ -218,6 +220,58 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
       if (!mapRef.current) return;
       let cancelled = false;
 
+      async function syncShopCorridors() {
+        const L = await import("leaflet");
+        const leafletMap = mapRef.current;
+        if (cancelled || !leafletMap) return;
+
+        Array.from(segmentLayersRef.current.entries())
+          .filter(([key]) => key.startsWith("shop-corridor-"))
+          .forEach(([key, layer]) => {
+            layer.remove();
+            segmentLayersRef.current.delete(key);
+          });
+
+        if (zoomLevel < SHOP_CORRIDOR_ZOOM_THRESHOLD) return;
+
+        city.shopCorridors.forEach((corridor) => {
+          const latLngs = corridor.path.map(
+            (point) => [point.lat, point.lng] as LeafletType.LatLngTuple,
+          );
+          const keyBase = `shop-corridor-${corridor.id}`;
+          const halo = L.polyline(latLngs, {
+            color: shopCorridorPalette[corridor.level],
+            weight: 12,
+            opacity: 0.14,
+            interactive: false,
+          }).addTo(leafletMap);
+          const line = L.polyline(latLngs, {
+            color: shopCorridorPalette[corridor.level],
+            weight: 4,
+            opacity: 0.96,
+            dashArray: "1 9",
+            lineCap: "round",
+            interactive: false,
+          }).bindTooltip(formatShopCorridorTooltip(corridor, locale), {
+            direction: "top",
+            offset: [0, -8],
+          }).addTo(leafletMap);
+
+          segmentLayersRef.current.set(`${keyBase}-halo`, halo);
+          segmentLayersRef.current.set(keyBase, line);
+        });
+      }
+
+      syncShopCorridors();
+      return () => {
+        cancelled = true;
+      };
+    }, [city, locale, zoomLevel]);
+
+    useEffect(() => {
+      if (!mapRef.current) return;
+      let cancelled = false;
+
       async function syncPriceMarkers() {
         const L = await import("leaflet");
         const leafletMap = mapRef.current;
@@ -274,6 +328,10 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
             ? locale === "ko"
               ? "가게별 평균 가격 표시 중"
               : "Showing average prices by shop"
+            : zoomLevel >= SHOP_CORRIDOR_ZOOM_THRESHOLD
+              ? locale === "ko"
+                ? "상점 밀집 거리 레이어 표시 중"
+                : "Showing shop-street layer"
             : locale === "ko"
               ? "호객 위험 도로 색상 표시"
               : "Showing tout-risk road colors";
@@ -299,6 +357,29 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
     );
   },
 );
+
+function formatShopCorridorTooltip(corridor: ShopCorridor, locale: AppLocale) {
+  const levelCopy =
+    locale === "ko"
+      ? corridor.level === "High"
+        ? "상점 밀집 높음"
+        : corridor.level === "Medium"
+          ? "상점 밀집 보통"
+          : "상점 밀집 낮음"
+      : corridor.level === "High"
+        ? "High shop density"
+        : corridor.level === "Medium"
+          ? "Medium shop density"
+          : "Low shop density";
+
+  const streetName = locale === "ko" ? corridor.name : corridor.nameEn;
+  const countCopy =
+    locale === "ko"
+      ? `상점 약 ${corridor.storeCount}곳`
+      : `About ${corridor.storeCount} stores`;
+
+  return `${streetName}\n${levelCopy}\n${countCopy}`;
+}
 
 function FallbackSatelliteMap({ city, selectedSegmentId, onSelectSegment }: Pick<RiskMapProps, "city" | "selectedSegmentId" | "onSelectSegment">) {
   const projected = useMemo(() => projectCity(city), [city]);

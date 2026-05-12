@@ -79,6 +79,12 @@ export const travelerTypeLabelMapEn: Record<string, string> = {
   "Digital nomad": "Digital nomad",
 };
 
+export const shopCorridorPalette = {
+  Low: "#4bbd88",
+  Medium: "#f1b84b",
+  High: "#ea5b3f",
+} as const;
+
 export const productCatalog: ProductCatalogItem[] = [
   {
     id: "vietnamese-coffee",
@@ -300,6 +306,76 @@ export const cities: CityData[] = [
             evidenceEn:
               "Signals mention purchase pressure for imitation accessories from small edge-side stalls.",
           },
+        ],
+      },
+    ],
+    shopCorridors: [
+      {
+        id: "hcmc-ben-thanh-market-grid",
+        name: "벤탄시장 북측 상점 골목",
+        nameEn: "Ben Thanh north retail alleys",
+        level: "High",
+        storeCount: 22,
+        path: [
+          { lat: 10.77302, lng: 106.69712 },
+          { lat: 10.77295, lng: 106.69746 },
+          { lat: 10.77286, lng: 106.69782 },
+          { lat: 10.77277, lng: 106.69819 },
+          { lat: 10.77268, lng: 106.69855 },
+          { lat: 10.7726, lng: 106.69892 },
+        ],
+      },
+      {
+        id: "hcmc-ben-thanh-east-lane",
+        name: "시장 동측 기념품 라인",
+        nameEn: "East souvenir lane",
+        level: "Medium",
+        storeCount: 14,
+        path: [
+          { lat: 10.77289, lng: 106.69878 },
+          { lat: 10.77298, lng: 106.69908 },
+          { lat: 10.77308, lng: 106.69939 },
+          { lat: 10.77318, lng: 106.69969 },
+        ],
+      },
+      {
+        id: "hcmc-bui-vien-retail-strip",
+        name: "부이비엔 상점 스트립",
+        nameEn: "Bui Vien retail strip",
+        level: "High",
+        storeCount: 18,
+        path: [
+          { lat: 10.76705, lng: 106.69296 },
+          { lat: 10.76718, lng: 106.69336 },
+          { lat: 10.76731, lng: 106.69377 },
+          { lat: 10.76744, lng: 106.69418 },
+          { lat: 10.76757, lng: 106.69458 },
+        ],
+      },
+      {
+        id: "hcmc-bui-vien-side-alley",
+        name: "부이비엔 측면 골목",
+        nameEn: "Bui Vien side alley",
+        level: "Low",
+        storeCount: 7,
+        path: [
+          { lat: 10.76722, lng: 106.69351 },
+          { lat: 10.76695, lng: 106.69369 },
+          { lat: 10.7667, lng: 106.69387 },
+        ],
+      },
+      {
+        id: "hcmc-nguyen-hue-retail-edge",
+        name: "응우옌후에 리테일 엣지",
+        nameEn: "Nguyen Hue retail edge",
+        level: "Medium",
+        storeCount: 11,
+        path: [
+          { lat: 10.77401, lng: 106.70352 },
+          { lat: 10.77383, lng: 106.70395 },
+          { lat: 10.77364, lng: 106.70439 },
+          { lat: 10.77347, lng: 106.70482 },
+          { lat: 10.77329, lng: 106.70524 },
         ],
       },
     ],
@@ -568,6 +644,75 @@ export const cities: CityData[] = [
             evidenceEn:
               "Short entry stretches concentrate reports of people being followed after refusing.",
           },
+        ],
+      },
+    ],
+    shopCorridors: [
+      {
+        id: "hanoi-lake-market-lane",
+        name: "호안끼엠 서측 상점 골목",
+        nameEn: "West Hoan Kiem retail lane",
+        level: "High",
+        storeCount: 20,
+        path: [
+          { lat: 21.02986, lng: 105.85079 },
+          { lat: 21.02961, lng: 105.85118 },
+          { lat: 21.02935, lng: 105.85157 },
+          { lat: 21.02909, lng: 105.85197 },
+          { lat: 21.02884, lng: 105.85235 },
+        ],
+      },
+      {
+        id: "hanoi-night-market-main",
+        name: "야시장 메인 골목",
+        nameEn: "Night market main alley",
+        level: "High",
+        storeCount: 24,
+        path: [
+          { lat: 21.03595, lng: 105.84966 },
+          { lat: 21.03586, lng: 105.85012 },
+          { lat: 21.03577, lng: 105.85058 },
+          { lat: 21.03568, lng: 105.85104 },
+          { lat: 21.03558, lng: 105.8515 },
+          { lat: 21.03549, lng: 105.85196 },
+        ],
+      },
+      {
+        id: "hanoi-night-market-cross",
+        name: "야시장 교차 골목",
+        nameEn: "Night market cross lane",
+        level: "Medium",
+        storeCount: 12,
+        path: [
+          { lat: 21.03571, lng: 105.85059 },
+          { lat: 21.03541, lng: 105.85078 },
+          { lat: 21.03511, lng: 105.85098 },
+        ],
+      },
+      {
+        id: "hanoi-ta-hien-retail",
+        name: "따히엔 상점 구간",
+        nameEn: "Ta Hien retail strip",
+        level: "Medium",
+        storeCount: 10,
+        path: [
+          { lat: 21.03587, lng: 105.85177 },
+          { lat: 21.03567, lng: 105.85205 },
+          { lat: 21.03547, lng: 105.85233 },
+          { lat: 21.03528, lng: 105.85262 },
+          { lat: 21.03509, lng: 105.8529 },
+        ],
+      },
+      {
+        id: "hanoi-ta-hien-side-lane",
+        name: "따히엔 측면 골목",
+        nameEn: "Ta Hien side lane",
+        level: "Low",
+        storeCount: 6,
+        path: [
+          { lat: 21.03542, lng: 105.85236 },
+          { lat: 21.03523, lng: 105.85214 },
+          { lat: 21.03504, lng: 105.85192 },
         ],
       },
     ],

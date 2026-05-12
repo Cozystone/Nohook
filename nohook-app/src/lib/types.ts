@@ -63,6 +63,17 @@ export type StoreListing = {
   items: StoreItemPrice[];
 };
 
+export type ShopCorridorLevel = "Low" | "Medium" | "High";
+
+export type ShopCorridor = {
+  id: string;
+  name: string;
+  nameEn: string;
+  level: ShopCorridorLevel;
+  storeCount: number;
+  path: LatLngPoint[];
+};
+
 export type CityData = {
   id: string;
   shortLabel: string;
@@ -75,6 +86,7 @@ export type CityData = {
   zoom: number;
   landmarks: CityLandmark[];
   segments: RoadSegment[];
+  shopCorridors: ShopCorridor[];
   storeListings: StoreListing[];
 };
 
