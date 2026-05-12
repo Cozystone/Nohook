@@ -145,6 +145,7 @@ type DashboardProps = {
 };
 
 type AppTab = "map" | "report";
+type SheetMode = "peek" | "mid" | "full";
 
 const initialReportState = {
   status: "idle" as "idle" | "submitting" | "success" | "error",
@@ -156,6 +157,7 @@ export function Dashboard({ cities }: DashboardProps) {
   const [activeCityId, setActiveCityId] = useState(cities[0]?.id ?? "");
   const [selectedSegmentId, setSelectedSegmentId] = useState(cities[0]?.segments[0]?.id ?? "");
   const [activeTab, setActiveTab] = useState<AppTab>("map");
+  const [sheetMode, setSheetMode] = useState<SheetMode>("peek");
   const [reportState, setReportState] = useState(initialReportState);
   const [citySearchQuery, setCitySearchQuery] = useState("");
   const [itemQuery, setItemQuery] = useState("");
@@ -232,6 +234,7 @@ export function Dashboard({ cities }: DashboardProps) {
       startTransition(() => {
         setReportState({ status: "success", message: result.message });
         setActiveTab("report");
+        setSheetMode("full");
       });
     } catch {
       setReportState({ status: "error", message: t.reportError });
@@ -252,6 +255,25 @@ export function Dashboard({ cities }: DashboardProps) {
       ? categoryLabelMap[category] ?? category
       : categoryLabelMapEn[category] ?? category;
   }
+
+  function cycleSheetMode() {
+    setSheetMode((current) =>
+      current === "peek" ? "mid" : current === "mid" ? "full" : "peek",
+    );
+  }
+
+  const sheetHeightClass =
+    activeTab === "report"
+      ? sheetMode === "peek"
+        ? "max-h-[16vh]"
+        : sheetMode === "mid"
+          ? "max-h-[24vh]"
+          : "max-h-[36vh]"
+      : sheetMode === "peek"
+        ? "max-h-[10vh]"
+        : sheetMode === "mid"
+          ? "max-h-[18vh]"
+          : "max-h-[28vh]";
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#071019] text-white">
@@ -370,6 +392,28 @@ export function Dashboard({ cities }: DashboardProps) {
 
                 <div className="absolute inset-x-0 bottom-0 z-30 px-2.5 pb-2.5">
                   <div className={`rounded-[1.2rem] border border-white/10 bg-[rgba(7,12,18,0.82)] shadow-[0_16px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl ${activeTab === "report" ? "" : "bg-[rgba(7,12,18,0.76)]"}`}>
+                    <div className="flex items-center justify-center pt-2">
+                      <button
+                        type="button"
+                        onClick={cycleSheetMode}
+                        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[10px] text-white/72"
+                      >
+                        <span className="block h-1 w-8 rounded-full bg-white/38" />
+                        <span>
+                          {locale === "ko"
+                            ? sheetMode === "peek"
+                              ? "올려보기"
+                              : sheetMode === "mid"
+                                ? "더 열기"
+                                : "내리기"
+                            : sheetMode === "peek"
+                              ? "Raise"
+                              : sheetMode === "mid"
+                                ? "Expand"
+                                : "Lower"}
+                        </span>
+                      </button>
+                    </div>
                     <div className="flex items-center justify-between gap-2.5 border-b border-white/8 px-3.5 py-2.5">
                       <div className="min-w-0">
                         <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">{t.selectedRoad}</p>
@@ -383,7 +427,7 @@ export function Dashboard({ cities }: DashboardProps) {
                       <TabButton active={activeTab === "report"} label={t.report} onClick={() => setActiveTab("report")} />
                     </div>
 
-                    <div className={`overflow-y-auto px-3.5 pb-3.5 pt-2.5 ${activeTab === "map" ? "max-h-[16vh]" : "max-h-[28vh]"}`}>
+                    <div className={`overflow-y-auto px-3.5 pb-3.5 pt-2.5 ${sheetHeightClass}`}>
                       {activeTab === "map" ? (
                         <InsightPanel city={activeCity} locale={locale} matchedProduct={matchedProduct} matchedStores={matchedStores} selectedSegment={selectedSegment} zoomLevel={mapZoom} zoomThreshold={zoomThreshold} getCategoryLabel={getCategoryLabel} />
                       ) : (
