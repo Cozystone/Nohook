@@ -263,16 +263,16 @@ export function Dashboard({ cities }: DashboardProps) {
         <LocaleButton active={locale === "en"} label="EN" onClick={() => setLocale("en")} />
       </div>
 
-      <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1320px] flex-col items-center justify-center gap-8 px-4 py-8 xl:flex-row xl:justify-between">
-        <div className="w-full max-w-[290px] xl:max-w-[310px]">
-          <div className="rounded-[2rem] border border-white/10 bg-white/6 p-5 shadow-[0_30px_90px_rgba(0,0,0,0.32)] backdrop-blur-xl">
+      <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-[1280px] flex-col items-center justify-center gap-6 px-4 py-6 xl:flex-row xl:justify-between">
+        <div className="w-full max-w-[272px] xl:max-w-[292px]">
+          <div className="rounded-[1.8rem] border border-white/10 bg-white/6 p-4 shadow-[0_24px_72px_rgba(0,0,0,0.28)] backdrop-blur-xl">
             <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-white/68">
               <span className="rounded-full border border-white/12 bg-white/10 px-3 py-1">{t.beta}</span>
               <span className="rounded-full border border-white/12 bg-white/6 px-3 py-1">{t.mapTag}</span>
             </div>
-            <h1 className="mt-5 whitespace-pre-line text-3xl font-semibold leading-[1.02] tracking-[-0.06em] text-white xl:text-[3rem]">{t.heroTitle}</h1>
-            <p className="mt-4 text-sm leading-7 text-white/72">{t.heroBody}</p>
-            <div className="mt-5 grid grid-cols-3 gap-3">
+            <h1 className="mt-4 whitespace-pre-line text-[2.55rem] font-semibold leading-[0.98] tracking-[-0.065em] text-white xl:text-[2.75rem]">{t.heroTitle}</h1>
+            <p className="mt-3 text-[13px] leading-6 text-white/72">{t.heroBody}</p>
+            <div className="mt-4 grid grid-cols-3 gap-2.5">
               <HeroStat label={t.monitoring} value="6" />
               <HeroStat label={t.highRisk} value="2" />
               <HeroStat label={t.recentReports} value="33" />
@@ -282,7 +282,7 @@ export function Dashboard({ cities }: DashboardProps) {
 
         <IPhoneMockup>
           <div className="relative flex h-full flex-col overflow-hidden bg-[#070d14] text-white">
-            <div className="relative z-30 flex items-center justify-between px-6 pb-2 pt-5 text-[13px] font-medium">
+            <div className="relative z-30 flex items-center justify-between px-5 pb-1.5 pt-4 text-[12px] font-medium">
               <span>9:41</span>
               <div className="flex items-center gap-1.5 text-white/72">
                 <span className="h-2 w-2 rounded-full bg-white/75" />
@@ -291,14 +291,14 @@ export function Dashboard({ cities }: DashboardProps) {
               </div>
             </div>
 
-            <div className="relative z-30 px-4">
-              <div className="rounded-[1.35rem] border border-white/10 bg-black/34 px-4 py-3 shadow-[0_16px_36px_rgba(0,0,0,0.22)] backdrop-blur-xl">
+            <div className="relative z-30 px-3.5">
+              <div className="rounded-[1.18rem] border border-white/10 bg-black/34 px-3.5 py-2.5 shadow-[0_14px_30px_rgba(0,0,0,0.2)] backdrop-blur-xl">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-[10px] uppercase tracking-[0.2em] text-white/44">Nohook</p>
-                    <h2 className="mt-1 text-[1.42rem] font-semibold tracking-[-0.05em]">{t.todayRoute}</h2>
+                    <h2 className="mt-1 text-[1.2rem] font-semibold tracking-[-0.05em]">{t.todayRoute}</h2>
                   </div>
-                  <Link href="/admin" className="rounded-full border border-white/12 bg-white/6 px-3 py-2 text-[11px] text-white/76">{t.admin}</Link>
+                  <Link href="/admin" className="rounded-full border border-white/12 bg-white/6 px-2.5 py-1.5 text-[10px] text-white/76">{t.admin}</Link>
                 </div>
 
                 <SearchBox value={citySearchQuery} onChange={(value) => { setCitySearchQuery(value); setSearchOpen(true); }} onFocus={() => setSearchOpen(true)} placeholder={t.citySearchPlaceholder} />
@@ -351,39 +351,39 @@ export function Dashboard({ cities }: DashboardProps) {
               </div>
             </div>
 
-            <div className="relative z-0 mt-3 flex-1 px-4 pb-4">
-              <div className="relative h-full overflow-hidden rounded-[2rem] border border-white/10 bg-[#091018] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
+            <div className="relative z-0 mt-2.5 flex-1 px-3.5 pb-3.5">
+              <div className="relative h-full overflow-hidden rounded-[1.72rem] border border-white/10 bg-[#091018] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)]">
                 <GoogleRiskMap ref={mapRef} city={activeCity} selectedSegmentId={selectedSegment.id} selectedProductId={matchedProduct?.id} locale={locale} onSelectSegment={setSelectedSegmentId} onZoomLevelChange={setMapZoom} />
 
-                <div className="absolute left-3 top-3 z-30 flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-white/10 bg-black/44 px-3 py-1.5 text-[11px] font-medium text-white/88 backdrop-blur-xl">{locale === "ko" ? activeCity.label : activeCity.labelEn}</span>
-                  <span className="rounded-full px-3 py-1.5 text-[11px] font-semibold text-white shadow-[0_12px_22px_rgba(0,0,0,0.22)]" style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}>
+                <div className="absolute left-2.5 top-2.5 z-30 flex flex-wrap items-center gap-1.5">
+                  <span className="rounded-full border border-white/10 bg-black/44 px-2.5 py-1 text-[10px] font-medium text-white/88 backdrop-blur-xl">{locale === "ko" ? activeCity.label : activeCity.labelEn}</span>
+                  <span className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.2)]" style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}>
                     {locale === "ko" ? riskLabelMap[selectedSegment.riskLevel] : riskLabelMapEn[selectedSegment.riskLevel]}
                   </span>
-                  <span className="rounded-full border border-white/10 bg-black/44 px-3 py-1.5 text-[11px] text-white/82 backdrop-blur-xl">{t.cityOverlay}</span>
+                  <span className="rounded-full border border-white/10 bg-black/44 px-2.5 py-1 text-[10px] text-white/82 backdrop-blur-xl">{t.cityOverlay}</span>
                 </div>
 
-                <div className="absolute right-3 top-3 z-30 flex flex-col gap-2">
+                <div className="absolute right-2.5 top-2.5 z-30 flex flex-col gap-1.5">
                   <MapButton label="+" onClick={() => mapRef.current?.zoomIn()} />
                   <MapButton label="-" onClick={() => mapRef.current?.zoomOut()} />
                 </div>
 
-                <div className="absolute inset-x-0 bottom-0 z-30 px-3 pb-3">
-                  <div className={`rounded-[1.45rem] border border-white/10 bg-[rgba(7,12,18,0.84)] shadow-[0_20px_40px_rgba(0,0,0,0.28)] backdrop-blur-xl ${activeTab === "report" ? "" : "bg-[rgba(7,12,18,0.78)]"}`}>
-                    <div className="flex items-center justify-between gap-3 border-b border-white/8 px-4 py-3">
+                <div className="absolute inset-x-0 bottom-0 z-30 px-2.5 pb-2.5">
+                  <div className={`rounded-[1.2rem] border border-white/10 bg-[rgba(7,12,18,0.82)] shadow-[0_16px_32px_rgba(0,0,0,0.24)] backdrop-blur-xl ${activeTab === "report" ? "" : "bg-[rgba(7,12,18,0.76)]"}`}>
+                    <div className="flex items-center justify-between gap-2.5 border-b border-white/8 px-3.5 py-2.5">
                       <div className="min-w-0">
                         <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">{t.selectedRoad}</p>
-                        <p className="mt-1 truncate text-[15px] font-semibold tracking-[-0.03em]">{locale === "ko" ? selectedSegment.name : selectedSegment.nameEn}</p>
+                        <p className="mt-1 truncate text-[13px] font-semibold tracking-[-0.03em]">{locale === "ko" ? selectedSegment.name : selectedSegment.nameEn}</p>
                       </div>
-                      <span className="shrink-0 rounded-full border border-white/10 bg-white/6 px-3 py-1 text-[11px] text-white/72">{t.reportCount} {selectedSegment.recentReportCount}</span>
+                      <span className="shrink-0 rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[10px] text-white/72">{t.reportCount} {selectedSegment.recentReportCount}</span>
                     </div>
 
-                    <div className="flex gap-2 px-4 pt-3">
+                    <div className="flex gap-2 px-3.5 pt-2.5">
                       <TabButton active={activeTab === "map"} label={t.riskInfo} onClick={() => setActiveTab("map")} />
                       <TabButton active={activeTab === "report"} label={t.report} onClick={() => setActiveTab("report")} />
                     </div>
 
-                    <div className={`overflow-y-auto px-4 pb-4 pt-3 ${activeTab === "map" ? "max-h-[22vh]" : "max-h-[34vh]"}`}>
+                    <div className={`overflow-y-auto px-3.5 pb-3.5 pt-2.5 ${activeTab === "map" ? "max-h-[16vh]" : "max-h-[28vh]"}`}>
                       {activeTab === "map" ? (
                         <InsightPanel city={activeCity} locale={locale} matchedProduct={matchedProduct} matchedStores={matchedStores} selectedSegment={selectedSegment} zoomLevel={mapZoom} zoomThreshold={zoomThreshold} getCategoryLabel={getCategoryLabel} />
                       ) : (
@@ -403,19 +403,19 @@ export function Dashboard({ cities }: DashboardProps) {
 
 function SearchBox({ value, onChange, onFocus, placeholder }: { value: string; onChange: (value: string) => void; onFocus?: () => void; placeholder: string; }) {
   return (
-    <div className="mt-3 rounded-[0.95rem] border border-white/10 bg-white/6 px-4 py-2.5">
-      <input value={value} onChange={(event) => onChange(event.target.value)} onFocus={onFocus} placeholder={placeholder} className="w-full bg-transparent text-sm text-white outline-none placeholder:text-white/36" />
+    <div className="mt-2.5 rounded-[0.9rem] border border-white/10 bg-white/6 px-3.5 py-2">
+      <input value={value} onChange={(event) => onChange(event.target.value)} onFocus={onFocus} placeholder={placeholder} className="w-full bg-transparent text-[13px] text-white outline-none placeholder:text-white/36" />
     </div>
   );
 }
 
 function IPhoneMockup({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-full max-w-[min(88vw,390px)] shrink-0 xl:max-w-[380px]">
+    <div className="relative w-full max-w-[min(84vw,372px)] shrink-0 xl:max-w-[364px]">
       <div className="pointer-events-none absolute -inset-8 rounded-[4rem] bg-[radial-gradient(circle_at_50%_16%,rgba(59,130,246,0.16),transparent_22%),radial-gradient(circle_at_50%_84%,rgba(16,185,129,0.12),transparent_18%)] blur-3xl" />
-      <div className="relative rounded-[3.25rem] border border-white/12 bg-[#d2d6de] p-[9px] shadow-[0_44px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(255,255,255,0.08)]">
+      <div className="relative rounded-[3rem] border border-white/12 bg-[#d2d6de] p-[8px] shadow-[0_40px_88px_rgba(0,0,0,0.46),0_0_0_1px_rgba(255,255,255,0.08)]">
         <div className="pointer-events-none absolute left-1/2 top-[14px] z-30 h-7 w-34 -translate-x-1/2 rounded-full bg-[#0a0f16]" />
-        <div className="relative overflow-hidden rounded-[2.7rem] bg-[#070d14]"><div className="aspect-[420/860] w-full">{children}</div></div>
+        <div className="relative overflow-hidden rounded-[2.5rem] bg-[#070d14]"><div className="aspect-[420/860] w-full">{children}</div></div>
       </div>
     </div>
   );
@@ -423,18 +423,18 @@ function IPhoneMockup({ children }: { children: React.ReactNode }) {
 
 function LocaleButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void; }) {
   return (
-    <button type="button" onClick={onClick} className={`rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur-xl ${active ? "border-white/14 bg-white text-stone-950" : "border-white/10 bg-black/28 text-white/78"}`}>{label}</button>
+    <button type="button" onClick={onClick} className={`rounded-full border px-2.5 py-1 text-[11px] font-medium backdrop-blur-xl ${active ? "border-white/14 bg-white text-stone-950" : "border-white/10 bg-black/28 text-white/78"}`}>{label}</button>
   );
 }
 
 function HeroStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.15rem] border border-white/8 bg-white/6 px-3 py-3"><p className="text-[11px] uppercase tracking-[0.12em] text-white/48">{label}</p><p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-white">{value}</p></div>
+    <div className="rounded-[1rem] border border-white/8 bg-white/6 px-3 py-2.5"><p className="text-[10px] uppercase tracking-[0.12em] text-white/48">{label}</p><p className="mt-1.5 text-[1.7rem] font-semibold tracking-[-0.04em] text-white">{value}</p></div>
   );
 }
 
 function MapButton({ label, onClick }: { label: string; onClick: () => void; }) {
-  return <button type="button" onClick={onClick} className="flex h-9 w-9 items-center justify-center rounded-[1rem] border border-white/10 bg-black/48 text-base font-semibold text-white shadow-[0_12px_24px_rgba(0,0,0,0.26)] backdrop-blur-xl">{label}</button>;
+  return <button type="button" onClick={onClick} className="flex h-8 w-8 items-center justify-center rounded-[0.9rem] border border-white/10 bg-black/48 text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(0,0,0,0.24)] backdrop-blur-xl">{label}</button>;
 }
 
 function TabButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void; }) {
