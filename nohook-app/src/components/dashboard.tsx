@@ -46,13 +46,11 @@ const riskCopy: Record<AppLocale, Record<RiskLevel, string>> = {
 };
 
 const zoomThreshold = 17;
-
-const glassPanel = "border border-white/12 bg-[linear-gradient(180deg,rgba(20,24,31,0.66)_0%,rgba(12,16,22,0.52)_100%)] shadow-[0_20px_60px_rgba(0,0,0,0.28)] backdrop-blur-2xl";
+const glassPanel = "border border-white/12 bg-[linear-gradient(180deg,rgba(18,22,29,0.68)_0%,rgba(12,16,22,0.48)_100%)] shadow-[0_18px_48px_rgba(0,0,0,0.28)] backdrop-blur-2xl";
 
 const uiCopy = {
   ko: {
-    beta: "Nohook beta",
-    mapTag: "베트남 거리 위험 지도",
+    beta: "베트남 거리 위험 지도",
     admin: "운영",
     citySearchPlaceholder: "도시 검색",
     itemSearchPlaceholder: "살 물건 검색",
@@ -63,11 +61,7 @@ const uiCopy = {
     itemAiNoMatch: "아직 인식하지 못했습니다.",
     itemZoomHint: "더 확대하면 가게 가격이 보입니다.",
     itemZoomReady: "가게별 평균 가격이 표시됩니다.",
-    cityOverlay: "도로 오버레이",
     selectedRoad: "선택 도로",
-    riskInfo: "위험 정보",
-    report: "신고",
-    reportCount: "최근 신고",
     score: "점수",
     judgement: "판단",
     reports: "신고",
@@ -85,7 +79,7 @@ const uiCopy = {
     reportError: "신고 전송에 실패했습니다.",
     priceAverage: "평균",
     shopsFound: "개 가게",
-    searchLabel: "검색",
+    searchLabel: "도시",
     itemLabel: "물건",
     popupOpen: "열기",
     popupClose: "닫기",
@@ -93,8 +87,7 @@ const uiCopy = {
     popupBack: "정보",
   },
   en: {
-    beta: "Nohook beta",
-    mapTag: "Vietnam street risk map",
+    beta: "Vietnam street risk map",
     admin: "Admin",
     citySearchPlaceholder: "Search city",
     itemSearchPlaceholder: "Search item",
@@ -105,11 +98,7 @@ const uiCopy = {
     itemAiNoMatch: "No item match yet.",
     itemZoomHint: "Zoom in to reveal shop prices.",
     itemZoomReady: "Shop average prices are visible.",
-    cityOverlay: "Road overlay",
     selectedRoad: "Selected road",
-    riskInfo: "Risk info",
-    report: "Report",
-    reportCount: "Reports",
     score: "Score",
     judgement: "Judgement",
     reports: "Reports",
@@ -127,7 +116,7 @@ const uiCopy = {
     reportError: "Failed to submit the report.",
     priceAverage: "Avg",
     shopsFound: "shops",
-    searchLabel: "Search",
+    searchLabel: "City",
     itemLabel: "Item",
     popupOpen: "Open",
     popupClose: "Close",
@@ -221,9 +210,7 @@ export function Dashboard({ cities }: DashboardProps) {
         body: JSON.stringify(requestBody),
       });
 
-      if (!response.ok) {
-        throw new Error("Unable to submit report");
-      }
+      if (!response.ok) throw new Error("Unable to submit report");
 
       const result = (await response.json()) as ReportSubmissionResult;
       startTransition(() => {
@@ -260,8 +247,8 @@ export function Dashboard({ cities }: DashboardProps) {
   }
 
   const popupClass = popupExpanded
-    ? "w-[min(82vw,320px)] max-h-[46vh]"
-    : "w-[min(60vw,222px)] max-h-[112px]";
+    ? "w-[min(76vw,292px)] max-h-[42vh]"
+    : "w-[min(56vw,208px)] max-h-[102px]";
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#071019] text-white">
@@ -288,7 +275,7 @@ export function Dashboard({ cities }: DashboardProps) {
               />
             </div>
 
-            <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(5,9,13,0.68)_0%,rgba(5,9,13,0.2)_18%,rgba(5,9,13,0)_36%,rgba(5,9,13,0.16)_100%)]" />
+            <div className="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(180deg,rgba(5,9,13,0.68)_0%,rgba(5,9,13,0.18)_20%,rgba(5,9,13,0)_38%,rgba(5,9,13,0.14)_100%)]" />
 
             <div className="relative z-30 flex items-center justify-between px-5 pb-1.5 pt-4 text-[12px] font-medium">
               <span>9:41</span>
@@ -300,20 +287,16 @@ export function Dashboard({ cities }: DashboardProps) {
             </div>
 
             <div className="relative z-30 px-3 pb-3">
-              <div className={`rounded-[1.35rem] px-3 py-3 ${glassPanel}`}>
-                <div className="flex items-center justify-between gap-3 pb-2.5">
+              <div className={`w-full rounded-[1.3rem] px-3 py-3 ${glassPanel}`}>
+                <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-white/54">
-                      <span>{t.beta}</span>
-                      <span className="h-1 w-1 rounded-full bg-white/24" />
-                      <span>{t.mapTag}</span>
-                    </div>
-                    <p className="mt-1.5 text-sm font-semibold text-white/94">{locale === "ko" ? activeCity.label : activeCity.labelEn}</p>
+                    <p className="text-[10px] uppercase tracking-[0.28em] text-white/44">NOHOOK</p>
+                    <p className="mt-1 text-[12px] text-white/62">{t.beta}</p>
                   </div>
                   <Link href="/admin" className="rounded-full border border-white/12 bg-white/8 px-3 py-1.5 text-[11px] text-white/78">{t.admin}</Link>
                 </div>
 
-                <div className="space-y-2">
+                <div className="mt-3 grid gap-2">
                   <div className="relative">
                     <TopSearchBox
                       value={citySearchQuery}
@@ -328,7 +311,7 @@ export function Dashboard({ cities }: DashboardProps) {
                     {searchOpen ? (
                       <div className={`absolute left-0 right-0 top-[calc(100%+8px)] overflow-hidden rounded-[1rem] ${glassPanel}`}>
                         {searchResults.length > 0 ? (
-                          <div className="max-h-40 overflow-y-auto p-2">
+                          <div className="max-h-36 overflow-y-auto p-2">
                             {searchResults.map((item) => (
                               <button
                                 key={item.id}
@@ -341,7 +324,7 @@ export function Dashboard({ cities }: DashboardProps) {
                                     setCitySearchQuery(item.name);
                                   }
                                 }}
-                                className="flex w-full items-start justify-between rounded-[0.9rem] px-3 py-2.5 text-left transition hover:bg-white/8"
+                                className="flex w-full items-start justify-between rounded-[0.9rem] px-3 py-2 text-left transition hover:bg-white/8"
                               >
                                 <div>
                                   <p className="text-sm font-medium text-white">{item.name}</p>
@@ -359,7 +342,9 @@ export function Dashboard({ cities }: DashboardProps) {
                   </div>
 
                   <TopSearchBox value={itemQuery} onChange={setItemQuery} placeholder={t.itemSearchPlaceholder} label={t.itemLabel} />
+                </div>
 
+                <div className="mt-2.5 flex items-center justify-between gap-2">
                   <div className="flex gap-2 overflow-x-auto pb-1">
                     {cities.map((city) => (
                       <button
@@ -372,18 +357,21 @@ export function Dashboard({ cities }: DashboardProps) {
                       </button>
                     ))}
                   </div>
+                  <span
+                    className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.2)]"
+                    style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}
+                  >
+                    {locale === "ko" ? riskLabelMap[selectedSegment.riskLevel] : riskLabelMapEn[selectedSegment.riskLevel]}
+                  </span>
                 </div>
 
                 {itemQuery.trim() ? (
-                  <div className="mt-2 rounded-[1rem] border border-white/10 bg-white/8 px-3 py-2 text-xs text-white/74 backdrop-blur-xl">
+                  <div className="mt-2 rounded-[0.95rem] border border-white/10 bg-white/8 px-3 py-2 text-[11px] text-white/72 backdrop-blur-xl">
                     {matchedProduct ? (
-                      <>
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-medium text-white">{locale === "ko" ? matchedProduct.name : matchedProduct.nameEn}</span>
-                          <span className="text-white/46">{t.itemAiMatched}</span>
-                        </div>
-                        <p className="mt-1 text-[11px] text-white/60">{mapZoom >= zoomThreshold ? t.itemZoomReady : t.itemZoomHint}</p>
-                      </>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate font-medium text-white">{locale === "ko" ? matchedProduct.name : matchedProduct.nameEn}</span>
+                        <span className="shrink-0 text-white/50">{mapZoom >= zoomThreshold ? t.itemZoomReady : t.itemZoomHint}</span>
+                      </div>
                     ) : (
                       <span className="text-white/60">{t.itemAiNoMatch}</span>
                     )}
@@ -392,26 +380,14 @@ export function Dashboard({ cities }: DashboardProps) {
               </div>
             </div>
 
-            <div className="absolute left-3 top-[176px] z-30 flex flex-wrap items-center gap-1.5">
-              <span className="rounded-full border border-white/12 bg-black/32 px-2.5 py-1 text-[10px] font-medium text-white/90 backdrop-blur-xl">
-                {locale === "ko" ? activeCity.shortLabel : activeCity.shortLabelEn}
-              </span>
-              <span
-                className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white shadow-[0_10px_18px_rgba(0,0,0,0.2)]"
-                style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}
-              >
-                {locale === "ko" ? riskLabelMap[selectedSegment.riskLevel] : riskLabelMapEn[selectedSegment.riskLevel]}
-              </span>
-            </div>
-
-            <div className="absolute right-3 top-[174px] z-30 flex flex-col gap-2">
+            <div className="absolute right-3 top-[168px] z-30 flex flex-col gap-2">
               <MapButton label="+" onClick={() => mapRef.current?.zoomIn()} />
               <MapButton label="-" onClick={() => mapRef.current?.zoomOut()} />
             </div>
 
             <div className="absolute bottom-3 left-3 z-30">
-              <div className={`overflow-hidden rounded-[1.25rem] ${glassPanel} transition-all duration-200 ${popupClass}`}>
-                <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-2.5">
+              <div className={`overflow-hidden rounded-[1.15rem] ${glassPanel} transition-all duration-200 ${popupClass}`}>
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3 py-2">
                   <div className="min-w-0">
                     <p className="text-[10px] uppercase tracking-[0.18em] text-white/42">{t.selectedRoad}</p>
                     <p className="mt-1 truncate text-[12px] font-semibold tracking-[-0.03em] text-white">
@@ -425,14 +401,14 @@ export function Dashboard({ cities }: DashboardProps) {
                         setPopupTab(popupTab === "info" ? "report" : "info");
                         setPopupExpanded(true);
                       }}
-                      className="rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[10px] text-white/78"
+                      className="rounded-full border border-white/12 bg-white/8 px-2 py-1 text-[10px] text-white/78"
                     >
                       {popupTab === "info" ? t.popupReport : t.popupBack}
                     </button>
                     <button
                       type="button"
                       onClick={() => setPopupExpanded((current) => !current)}
-                      className="rounded-full border border-white/12 bg-white/8 px-2.5 py-1 text-[10px] text-white/78"
+                      className="rounded-full border border-white/12 bg-white/8 px-2 py-1 text-[10px] text-white/78"
                     >
                       {popupExpanded ? t.popupClose : t.popupOpen}
                     </button>
@@ -493,7 +469,7 @@ function TopSearchBox({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-2 rounded-[1rem] border border-white/12 bg-white/8 px-3 py-2.5 backdrop-blur-xl">
+    <div className="flex items-center gap-2 rounded-[0.95rem] border border-white/12 bg-white/8 px-3 py-2 backdrop-blur-xl">
       <span className="text-sm text-white/40">⌕</span>
       <div className="min-w-0 flex-1">
         <p className="text-[9px] uppercase tracking-[0.16em] text-white/34">{label}</p>
@@ -511,12 +487,12 @@ function TopSearchBox({
 
 function IPhoneMockup({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative w-full max-w-[min(92vw,400px)] shrink-0">
+    <div className="relative w-full max-w-[min(92vw,396px)] shrink-0">
       <div className="pointer-events-none absolute -inset-8 rounded-[4rem] bg-[radial-gradient(circle_at_50%_16%,rgba(59,130,246,0.14),transparent_24%),radial-gradient(circle_at_50%_84%,rgba(16,185,129,0.12),transparent_18%)] blur-3xl" />
       <div className="relative rounded-[3rem] border border-white/12 bg-[#d6dae2] p-[8px] shadow-[0_40px_88px_rgba(0,0,0,0.44),0_0_0_1px_rgba(255,255,255,0.08)]">
         <div className="pointer-events-none absolute left-1/2 top-[14px] z-30 h-7 w-34 -translate-x-1/2 rounded-full bg-[#0a0f16] opacity-95" />
         <div className="relative overflow-hidden rounded-[2.45rem] bg-[#070d14]">
-          <div className="aspect-[430/820] w-full">{children}</div>
+          <div className="aspect-[430/790] w-full">{children}</div>
         </div>
       </div>
     </div>
@@ -540,7 +516,7 @@ function MapButton({ label, onClick }: { label: string; onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="flex h-9 w-9 items-center justify-center rounded-[1rem] border border-white/12 bg-[rgba(17,20,27,0.54)] text-[16px] font-semibold text-white shadow-[0_10px_20px_rgba(0,0,0,0.22)] backdrop-blur-xl"
+      className="flex h-9 w-9 items-center justify-center rounded-[1rem] border border-white/12 bg-[rgba(17,20,27,0.56)] text-[16px] font-semibold text-white shadow-[0_10px_20px_rgba(0,0,0,0.22)] backdrop-blur-xl"
     >
       {label}
     </button>
@@ -558,14 +534,14 @@ function CompactRoadPopup({
 }) {
   const t = uiCopy[locale];
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       <div className="grid grid-cols-3 gap-2">
         <InfoMetricCompact label={t.score} value={selectedSegment.riskScore.toString()} />
         <InfoMetricCompact label={t.judgement} value={riskCopy[locale][selectedSegment.riskLevel]} />
         <InfoMetricCompact label={t.reports} value={`${selectedSegment.recentReportCount}`} />
       </div>
       <div className="flex flex-wrap gap-1.5">
-        {selectedSegment.topCategories.slice(0, 3).map((category) => (
+        {selectedSegment.topCategories.slice(0, 2).map((category) => (
           <span key={category} className="rounded-full border border-white/12 bg-white/8 px-2 py-1 text-[10px] text-white/78 backdrop-blur-xl">
             {getCategoryLabel(category)}
           </span>
@@ -602,13 +578,6 @@ function InsightPanel({
         <InfoMetricCompact label={t.judgement} value={riskCopy[locale][selectedSegment.riskLevel]} />
         <InfoMetricCompact label={t.reports} value={`${selectedSegment.recentReportCount}`} />
         <InfoMetricCompact label={t.type} value={getCategoryLabel(selectedSegment.topCategories[0])} />
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {selectedSegment.topCategories.map((category) => (
-          <span key={category} className="rounded-full border border-white/12 bg-white/8 px-2.5 py-1.5 text-[10px] text-white/78 backdrop-blur-xl">
-            {getCategoryLabel(category)}
-          </span>
-        ))}
       </div>
       <div className="rounded-[1rem] border border-white/10 bg-white/8 px-3 py-2.5 text-xs leading-5 text-white/68 backdrop-blur-xl">
         {locale === "ko" ? selectedSegment.summary : selectedSegment.summaryEn}
