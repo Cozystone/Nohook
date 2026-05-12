@@ -269,7 +269,7 @@ export function GoogleRiskMap({
         duration: 800,
       });
     }
-  }, [city.landmarks, city.segments, selectedSegmentId]);
+  }, [city.landmarks, city.segments, selectedSegmentId, loadState]);
 
   const statusLabel =
     loadState === "loading"
