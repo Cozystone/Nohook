@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { type GeoJSONSource, type StyleSpecification } from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import "leaflet/dist/leaflet.css";
 import { riskPalette } from "@/lib/data";
 import type { CityData, LatLngPoint } from "@/lib/types";
+import type * as LeafletType from "leaflet";
 
 type RiskMapProps = {
   city: CityData;
@@ -12,57 +12,8 @@ type RiskMapProps = {
   onSelectSegment: (id: string) => void;
 };
 
-type LineFeature = GeoJSON.Feature<GeoJSON.LineString, {
-  id: string;
-  riskLevel: keyof typeof riskPalette;
-  selected: boolean;
-}>;
-
-type PointFeature = GeoJSON.Feature<GeoJSON.Point, { label: string }>;
-
 const FALLBACK_WIDTH = 1280;
 const FALLBACK_HEIGHT = 880;
-
-const mapStyle: StyleSpecification = {
-  version: 8,
-  sources: {
-    imagery: {
-      type: "raster",
-      tiles: [
-        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-      ],
-      tileSize: 256,
-      attribution: "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
-    },
-    labels: {
-      type: "raster",
-      tiles: [
-        "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-      ],
-      tileSize: 256,
-      attribution: "Esri",
-    },
-  },
-  layers: [
-    {
-      id: "imagery",
-      type: "raster",
-      source: "imagery",
-      minzoom: 0,
-      maxzoom: 19,
-    },
-    {
-      id: "labels",
-      type: "raster",
-      source: "labels",
-      minzoom: 0,
-      maxzoom: 19,
-      paint: {
-        "raster-opacity": 0.9,
-      },
-    },
-  ],
-};
 
 export function GoogleRiskMap({
   city,
@@ -70,7 +21,9 @@ export function GoogleRiskMap({
   onSelectSegment,
 }: RiskMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
+  const mapRef = useRef<LeafletType.Map | null>(null);
+  const segmentLayersRef = useRef<Map<string, LeafletType.Polyline>>(new Map());
+  const markerLayerRef = useRef<LeafletType.LayerGroup | null>(null);
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">(
     "loading",
   );
@@ -80,203 +33,169 @@ export function GoogleRiskMap({
       return;
     }
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: mapStyle,
-      center: [city.mapCenter.lng, city.mapCenter.lat],
-      zoom: city.zoom,
-      attributionControl: false,
-    });
+    const segmentLayers = segmentLayersRef.current;
+    let map: LeafletType.Map | null = null;
 
-    mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), "top-right");
+    async function initMap() {
+      const L = await import("leaflet");
 
-    map.on("load", () => {
-      setLoadState("ready");
-    });
+      map = L.map(containerRef.current!, {
+        zoomControl: false,
+        attributionControl: false,
+        preferCanvas: true,
+      });
 
-    map.on("click", "segment-lines", (event) => {
-      const feature = event.features?.[0];
-      const segmentId =
-        feature && "properties" in feature ? String(feature.properties?.id ?? "") : "";
+      mapRef.current = map;
 
-      if (segmentId) {
-        onSelectSegment(segmentId);
-      }
-    });
+      L.control.zoom({ position: "topright" }).addTo(map);
 
-    map.on("mouseenter", "segment-lines", () => {
-      map.getCanvas().style.cursor = "pointer";
-    });
+      const imageryLayer = L.tileLayer(
+        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        {
+          maxZoom: 19,
+          crossOrigin: true,
+        },
+      );
 
-    map.on("mouseleave", "segment-lines", () => {
-      map.getCanvas().style.cursor = "";
-    });
+      const labelLayer = L.tileLayer(
+        "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+        {
+          maxZoom: 19,
+          opacity: 0.92,
+          crossOrigin: true,
+        },
+      );
 
-    map.on("error", (event) => {
-      if (!event.error) {
-        return;
-      }
-      setLoadState("error");
-    });
+      let tileErrors = 0;
+      imageryLayer.on("load", () => setLoadState("ready"));
+      imageryLayer.on("tileerror", () => {
+        tileErrors += 1;
+        if (tileErrors > 4) {
+          setLoadState("error");
+        }
+      });
+
+      imageryLayer.addTo(map);
+      labelLayer.addTo(map);
+
+      setTimeout(() => {
+        map?.invalidateSize();
+      }, 0);
+    }
+
+    initMap();
 
     return () => {
-      map.remove();
+      map?.remove();
       mapRef.current = null;
+      segmentLayers.clear();
+      markerLayerRef.current = null;
     };
-  }, [city.id, city.mapCenter.lat, city.mapCenter.lng, city.zoom, onSelectSegment]);
+  }, []);
 
   useEffect(() => {
-    const map = mapRef.current;
-
-    if (!map || !map.isStyleLoaded()) {
+    if (!mapRef.current) {
       return;
     }
 
-    const lineFeatures: LineFeature[] = city.segments.map((segment) => ({
-      type: "Feature",
-      properties: {
-        id: segment.id,
-        riskLevel: segment.riskLevel,
-        selected: segment.id === selectedSegmentId,
-      },
-      geometry: {
-        type: "LineString",
-        coordinates: segment.path.map((point) => [point.lng, point.lat]),
-      },
-    }));
+    let cancelled = false;
 
-    const pointFeatures: PointFeature[] = city.landmarks.map((landmark) => ({
-      type: "Feature",
-      properties: { label: landmark.label },
-      geometry: {
-        type: "Point",
-        coordinates: [landmark.position.lng, landmark.position.lat],
-      },
-    }));
+    async function syncLayers() {
+      const L = await import("leaflet");
+      const leafletMap = mapRef.current;
 
-    const lineData = {
-      type: "FeatureCollection" as const,
-      features: lineFeatures,
+      if (cancelled || !leafletMap) {
+        return;
+      }
+
+      segmentLayersRef.current.forEach((layer) => layer.remove());
+      segmentLayersRef.current.clear();
+
+      if (markerLayerRef.current) {
+        markerLayerRef.current.remove();
+      }
+
+      const bounds = L.latLngBounds([]);
+
+      city.segments.forEach((segment) => {
+        const isSelected = segment.id === selectedSegmentId;
+        const latLngs = segment.path.map(
+          (point) => [point.lat, point.lng] as LeafletType.LatLngTuple,
+        );
+
+        const glow = L.polyline(latLngs, {
+          color: "#ffffff",
+          weight: isSelected ? 16 : 12,
+          opacity: 0.14,
+          interactive: false,
+        }).addTo(leafletMap);
+
+        const line = L.polyline(latLngs, {
+          color: riskPalette[segment.riskLevel],
+          weight: isSelected ? 10 : 7,
+          opacity: isSelected ? 1 : 0.88,
+        }).addTo(leafletMap);
+
+        line.on("click", () => onSelectSegment(segment.id));
+        line.on("mouseover", () => {
+          leafletMap.getContainer().style.cursor = "pointer";
+        });
+        line.on("mouseout", () => {
+          leafletMap.getContainer().style.cursor = "";
+        });
+
+        segmentLayersRef.current.set(segment.id, line);
+        segmentLayersRef.current.set(`${segment.id}-glow`, glow);
+        latLngs.forEach((point) => bounds.extend(point));
+      });
+
+      const markerLayer = L.layerGroup();
+
+      city.landmarks.forEach((landmark) => {
+        const marker = L.circleMarker(
+          [landmark.position.lat, landmark.position.lng],
+          {
+            radius: 5,
+            weight: 2,
+            color: "#0f172a",
+            fillColor: "#f8fafc",
+            fillOpacity: 0.95,
+          },
+        ).bindTooltip(landmark.label, {
+          permanent: false,
+          direction: "top",
+          offset: [0, -8],
+        });
+
+        marker.addTo(markerLayer);
+        bounds.extend([landmark.position.lat, landmark.position.lng]);
+      });
+
+      markerLayer.addTo(leafletMap);
+      markerLayerRef.current = markerLayer;
+
+      if (bounds.isValid()) {
+        leafletMap.fitBounds(bounds, {
+          padding: [88, 88],
+        });
+      } else {
+        leafletMap.setView([city.mapCenter.lat, city.mapCenter.lng], city.zoom);
+      }
+    }
+
+    syncLayers();
+
+    return () => {
+      cancelled = true;
     };
-
-    const pointData = {
-      type: "FeatureCollection" as const,
-      features: pointFeatures,
-    };
-
-    const lineSource = map.getSource("segments") as GeoJSONSource | undefined;
-    const landmarkSource = map.getSource("landmarks") as GeoJSONSource | undefined;
-
-    if (lineSource) {
-      lineSource.setData(lineData);
-    } else {
-      map.addSource("segments", {
-        type: "geojson",
-        data: lineData,
-      });
-
-      map.addLayer({
-        id: "segment-glow",
-        type: "line",
-        source: "segments",
-        paint: {
-          "line-color": [
-            "match",
-            ["get", "riskLevel"],
-            "Green",
-            riskPalette.Green,
-            "Yellow",
-            riskPalette.Yellow,
-            "Orange",
-            riskPalette.Orange,
-            riskPalette.Red,
-          ],
-          "line-width": [
-            "case",
-            ["boolean", ["get", "selected"], false],
-            16,
-            12,
-          ],
-          "line-opacity": 0.18,
-        },
-      });
-
-      map.addLayer({
-        id: "segment-lines",
-        type: "line",
-        source: "segments",
-        paint: {
-          "line-color": [
-            "match",
-            ["get", "riskLevel"],
-            "Green",
-            riskPalette.Green,
-            "Yellow",
-            riskPalette.Yellow,
-            "Orange",
-            riskPalette.Orange,
-            riskPalette.Red,
-          ],
-          "line-width": [
-            "case",
-            ["boolean", ["get", "selected"], false],
-            10,
-            7,
-          ],
-          "line-opacity": [
-            "case",
-            ["boolean", ["get", "selected"], false],
-            1,
-            0.88,
-          ],
-        },
-      });
-    }
-
-    if (landmarkSource) {
-      landmarkSource.setData(pointData);
-    } else {
-      map.addSource("landmarks", {
-        type: "geojson",
-        data: pointData,
-      });
-
-      map.addLayer({
-        id: "landmark-points",
-        type: "circle",
-        source: "landmarks",
-        paint: {
-          "circle-radius": 5,
-          "circle-color": "#f8fafc",
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#0f172a",
-        },
-      });
-    }
-
-    const bounds = new maplibregl.LngLatBounds();
-    city.segments.forEach((segment) => {
-      segment.path.forEach((point) => bounds.extend([point.lng, point.lat]));
-    });
-    city.landmarks.forEach((landmark) =>
-      bounds.extend([landmark.position.lng, landmark.position.lat]),
-    );
-
-    if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, {
-        padding: 88,
-        duration: 800,
-      });
-    }
-  }, [city.landmarks, city.segments, selectedSegmentId, loadState]);
+  }, [city, selectedSegmentId, onSelectSegment]);
 
   const statusLabel =
     loadState === "loading"
       ? "위성 지도를 불러오는 중"
       : loadState === "error"
         ? "위성 타일 로딩에 실패해 데모 지도로 전환됨"
-        : "MapLibre 위성 타일 사용 중";
+        : "Leaflet 위성 타일 사용 중";
 
   return (
     <div className="absolute inset-0">
@@ -323,7 +242,12 @@ function FallbackSatelliteMap({
         <rect width={FALLBACK_WIDTH} height={FALLBACK_HEIGHT} fill="#101720" />
 
         {projected.landMasses.map((mass, index) => (
-          <path key={`mass-${index}`} d={mass.d} fill={mass.fill} opacity={mass.opacity} />
+          <path
+            key={`mass-${index}`}
+            d={mass.d}
+            fill={mass.fill}
+            opacity={mass.opacity}
+          />
         ))}
 
         {projected.roadBeds.map((road, index) => (
@@ -383,7 +307,13 @@ function FallbackSatelliteMap({
 
         {projected.landmarks.map((landmark) => (
           <g key={landmark.label}>
-            <circle cx={landmark.x} cy={landmark.y} r="6" fill="#f8fafc" opacity="0.95" />
+            <circle
+              cx={landmark.x}
+              cy={landmark.y}
+              r="6"
+              fill="#f8fafc"
+              opacity="0.95"
+            />
             <text
               x={landmark.x + 12}
               y={landmark.y + 4}
