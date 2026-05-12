@@ -192,7 +192,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
 
         if (bounds.isValid()) {
           leafletMap.fitBounds(bounds, {
-            padding: [56, 56],
+            padding: [48, 48],
           });
         } else {
           leafletMap.setView([city.mapCenter.lat, city.mapCenter.lng], city.zoom);
@@ -210,7 +210,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
       loadState === "loading"
         ? "위성 지도를 불러오는 중"
         : loadState === "error"
-          ? "위성 타일 로딩에 실패해 데모 지도로 전환됨"
+          ? "위성 타일 로딩 실패, 데모 지도로 전환"
           : "위성 지도 연결됨";
 
     return (
@@ -225,7 +225,7 @@ export const GoogleRiskMap = forwardRef<RiskMapHandle, RiskMapProps>(
           />
         ) : null}
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-[linear-gradient(180deg,rgba(6,10,15,0)_0%,rgba(6,10,15,0.66)_100%)]" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28 bg-[linear-gradient(180deg,rgba(6,10,15,0)_0%,rgba(6,10,15,0.62)_100%)]" />
         <div className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 rounded-full border border-white/10 bg-black/65 px-4 py-2 text-[11px] text-white/90 backdrop-blur-md">
           {statusLabel}
         </div>
