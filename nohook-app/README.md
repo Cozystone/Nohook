@@ -1,38 +1,39 @@
 # Nohook MVP
 
-Deployable Next.js MVP for `Nohook`, a Vietnam street-risk mapping product that
-helps first-time travelers spot aggressive touting, fake taxi pressure, cyclo
-overcharge, and forced-tip hotspots before they walk in.
+실제 Google 지도 위에 베트남 관광지 위험 도로를 색상으로 표시하는 `Nohook`
+MVP입니다. 초행 관광객이 호객행위, 가짜 택시, 시클로 과다요금, 사진 유도 후
+팁 강요 같은 신호를 사전에 확인하는 데 초점을 둡니다.
 
-## What is implemented
+## 구현 범위
 
-- Public traveler map with road-segment risk overlays for:
-  - Ho Chi Minh City District 1
-  - Hanoi Old Quarter
-- Segment detail panel with risk reasoning and nearby place signals
-- Anonymous quick-report form wired to a mock moderation API
-- Admin moderation preview page at `/admin`
-- Route handlers for:
-  - `GET /api/segments`
-  - `GET /api/segments/:id`
-  - `POST /api/reports`
+- 실제 Google 지도 기반 도로 오버레이
+- 호치민 1군, 하노이 올드쿼터 핵심 구간 좌표 반영
+- 도로 상세 패널과 주변 신호 요약
+- 익명 신고 폼과 목업 운영 검수 API
+- 운영자 검수 프리뷰 페이지 `/admin`
 
-## Local development
+## 로컬 실행
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+브라우저에서 `http://localhost:3000`을 엽니다.
 
-## Deployment
+## Google Maps API 키 설정
 
-The app is designed to deploy to Vercel without environment variables.
+프로젝트 루트 `nohook-app` 아래에 `.env.local` 파일을 만들고 아래 값을 넣습니다.
 
-## Notes
+```bash
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
 
-- Current map and report data are mocked so the MVP can ship without external
-  API keys.
-- Google Places ingestion, persistent report storage, and moderation auth are
-  the next implementation steps after this first deployable vertical slice.
+키가 없으면 앱은 빌드되지만, 지도 영역에는 안내 메시지만 표시됩니다.
+
+## 배포 메모
+
+- Vercel 환경변수에도 동일하게 `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`를 등록해야
+  실제 지도가 보입니다.
+- 현재 위험도 데이터와 신고 저장은 목업 기반입니다.
+- 다음 단계는 Google Places 연동, 영구 DB 저장, 운영자 인증 추가입니다.

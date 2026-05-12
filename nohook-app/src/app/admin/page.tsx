@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cities } from "@/lib/data";
+import { cities, riskLabelMap } from "@/lib/data";
 
 const allSegments = cities.flatMap((city) =>
   city.segments.map((segment) => ({
@@ -19,35 +19,34 @@ export default function AdminPage() {
                 Operator review preview
               </p>
               <h1 className="mt-2 text-4xl font-semibold tracking-[-0.04em]">
-                Incident moderation queue
+                신고 검수 대기열
               </h1>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-stone-700">
-                This screen models the back-office workflow for approving or
-                rejecting traveler reports before they affect public segment
-                colors.
+                여행자 신고가 공개 위험 색상에 반영되기 전, 운영자가 승인·반려하는
+                백오피스 흐름을 보여주는 화면입니다.
               </p>
             </div>
             <Link
               href="/"
               className="inline-flex rounded-full border border-stone-900/12 px-4 py-2 text-sm text-stone-800 transition hover:bg-stone-950 hover:text-white"
             >
-              Back to traveler map
+              여행자 지도 화면으로
             </Link>
           </div>
         </header>
 
         <section className="grid gap-4 sm:grid-cols-3">
-          <SummaryCard label="Pending review" value="7" />
-          <SummaryCard label="Approved today" value="11" />
-          <SummaryCard label="Rejected duplicates" value="5" />
+          <SummaryCard label="검수 대기" value="7" />
+          <SummaryCard label="오늘 승인" value="11" />
+          <SummaryCard label="중복 반려" value="5" />
         </section>
 
         <section className="overflow-hidden rounded-[2rem] border border-stone-900/10 bg-white shadow-[0_18px_60px_rgba(74,57,34,0.08)]">
           <div className="grid grid-cols-[1.4fr_0.8fr_0.7fr_0.9fr] border-b border-stone-900/10 bg-[#f8f3ea] px-6 py-4 text-xs uppercase tracking-[0.18em] text-stone-500">
-            <span>Segment</span>
-            <span>City</span>
-            <span>Risk</span>
-            <span>Recent reports</span>
+            <span>도로 구간</span>
+            <span>도시</span>
+            <span>위험도</span>
+            <span>최근 신고</span>
           </div>
           <div className="divide-y divide-stone-900/8">
             {allSegments.map((segment) => (
@@ -64,7 +63,9 @@ export default function AdminPage() {
                   </p>
                 </div>
                 <p className="text-sm text-stone-700">{segment.city}</p>
-                <p className="text-sm text-stone-700">{segment.riskLevel}</p>
+                <p className="text-sm text-stone-700">
+                  {riskLabelMap[segment.riskLevel]}
+                </p>
                 <p className="text-sm font-mono text-stone-700">
                   {segment.recentReportCount}
                 </p>

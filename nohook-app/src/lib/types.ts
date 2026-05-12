@@ -1,5 +1,10 @@
 export type RiskLevel = "Green" | "Yellow" | "Orange" | "Red";
 
+export type LatLngPoint = {
+  lat: number;
+  lng: number;
+};
+
 export type PlaceSignal = {
   placeName: string;
   signalType: string;
@@ -16,14 +21,13 @@ export type RoadSegment = {
   topCategories: string[];
   reasons: string[];
   recentReportCount: number;
-  mapPath: string;
+  path: LatLngPoint[];
   placeSignals: PlaceSignal[];
 };
 
 export type CityLandmark = {
   label: string;
-  x: number;
-  y: number;
+  position: LatLngPoint;
 };
 
 export type CityData = {
@@ -31,6 +35,8 @@ export type CityData = {
   shortLabel: string;
   label: string;
   subtitle: string;
+  mapCenter: LatLngPoint;
+  zoom: number;
   landmarks: CityLandmark[];
   segments: RoadSegment[];
 };

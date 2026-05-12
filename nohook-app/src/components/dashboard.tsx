@@ -2,6 +2,14 @@
 
 import Link from "next/link";
 import { startTransition, useMemo, useState } from "react";
+import {
+  categoryLabelMap,
+  riskLabelMap,
+  riskPalette,
+  timeBucketLabelMap,
+  travelerTypeLabelMap,
+} from "@/lib/data";
+import { GoogleRiskMap } from "@/components/google-risk-map";
 import type {
   CityData,
   ReportPayload,
@@ -10,18 +18,11 @@ import type {
   RoadSegment,
 } from "@/lib/types";
 
-const riskPalette: Record<RiskLevel, string> = {
-  Green: "#1f9d77",
-  Yellow: "#f0b23c",
-  Orange: "#f06a3a",
-  Red: "#cf3f2f",
-};
-
 const riskCopy: Record<RiskLevel, string> = {
-  Green: "Low friction",
-  Yellow: "Stay alert",
-  Orange: "Repeated signals",
-  Red: "Avoid if possible",
+  Green: "상대적으로 안정적",
+  Yellow: "주의해서 이동",
+  Orange: "반복 신호 감지",
+  Red: "가능하면 우회 권장",
 };
 
 type DashboardProps = {
@@ -83,7 +84,7 @@ export function Dashboard({ cities }: DashboardProps) {
 
     setReportState({
       status: "submitting",
-      message: "Submitting live incident signal...",
+      message: "현장 신고를 전송하고 있습니다...",
     });
 
     try {
@@ -110,160 +111,196 @@ export function Dashboard({ cities }: DashboardProps) {
     } catch {
       setReportState({
         status: "error",
-        message: "Submission failed. Please retry when your connection is stable.",
+        message:
+          "신고 전송에 실패했습니다. 연결 상태를 확인한 뒤 다시 시도해 주세요.",
       });
     }
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,#f7e7c7_0,#f5f0e4_34%,#f4f1eb_62%,#ebe9df_100%)] text-stone-900">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
-        <header className="rounded-[2rem] border border-stone-900/10 bg-[#f8f5ef]/90 p-4 shadow-[0_18px_60px_rgba(69,50,25,0.08)] backdrop-blur sm:p-6">
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl space-y-6">
-              <div className="flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-stone-600">
-                <span className="rounded-full border border-stone-900/10 bg-white px-3 py-1">
+    <main className="min-h-screen bg-[#0f1318] text-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1600px] flex-col px-3 py-3 sm:px-4 lg:px-5">
+        <div className="relative flex min-h-[calc(100vh-24px)] flex-1 overflow-hidden rounded-[2rem] border border-white/10 bg-[#10161d] shadow-[0_28px_100px_rgba(0,0,0,0.42)]">
+          <GoogleRiskMap
+            city={activeCity}
+            selectedSegmentId={selectedSegment.id}
+            onSelectSegment={setSelectedSegmentId}
+          />
+
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(9,13,18,0.92)_0%,rgba(9,13,18,0.52)_52%,rgba(9,13,18,0)_100%)]" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-40 bg-[linear-gradient(270deg,rgba(9,13,18,0.86)_0%,rgba(9,13,18,0)_100%)]" />
+
+          <header className="pointer-events-auto absolute left-4 right-4 top-4 z-20 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl rounded-[1.6rem] border border-white/12 bg-black/35 px-4 py-4 backdrop-blur-md sm:px-5">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.28em] text-white/70">
+                <span className="rounded-full border border-white/14 bg-white/10 px-3 py-1">
                   Nohook beta
                 </span>
-                <span>Vietnam street risk map</span>
+                <span>베트남 거리 위험 지도</span>
               </div>
-              <div className="space-y-4">
-                <h1 className="max-w-3xl text-4xl font-semibold tracking-[-0.04em] text-stone-950 sm:text-6xl">
-                  Read the street before the street reads you.
-                </h1>
-                <p className="max-w-2xl text-base leading-7 text-stone-700 sm:text-lg">
-                  Nohook surfaces aggressive touting, fake taxi pressure,
-                  cyclo overcharge, and forced-photo tip hotspots as colored
-                  road segments for first-time travelers in Vietnam.
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-3 text-sm">
-                <div className="rounded-full bg-stone-950 px-4 py-2 text-stone-50">
-                  District-level MVP for Ho Chi Minh City and Hanoi
-                </div>
-                <div className="rounded-full border border-stone-900/15 px-4 py-2 text-stone-700">
-                  Review signals + traveler reports + operator moderation
-                </div>
+              <h1 className="mt-4 max-w-2xl text-3xl font-semibold tracking-[-0.05em] text-white sm:text-5xl">
+                위성 지도 위에서
+                <br />
+                위험 도로를 바로 확인합니다.
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-white/78 sm:text-base">
+                호객행위, 가짜 택시, 시클로 과다요금, 사진 유도 후 팁 강요
+                같은 신호를 실제 지도앱처럼 중심 화면에서 먼저 보여줍니다.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                <Pill label="호치민 1군 · 하노이 올드쿼터" tone="dark" />
+                <Pill label="리뷰 신호 + 여행자 신고 + 운영 검수" tone="outline" />
               </div>
             </div>
 
-            <div className="grid min-w-full gap-3 sm:grid-cols-3 lg:min-w-[24rem] lg:max-w-md">
+            <div className="grid grid-cols-3 gap-2 lg:w-[340px]">
               <StatCard
-                label="Monitored roads"
+                label="모니터링"
                 value={totals.monitoredRoads.toString()}
-                tone="sand"
+                tone="neutral"
               />
               <StatCard
-                label="High-risk roads"
+                label="고위험"
                 value={totals.redCount.toString()}
                 tone="red"
               />
               <StatCard
-                label="Recent reports"
+                label="최근 신고"
                 value={totals.totalReports.toString()}
                 tone="teal"
               />
             </div>
-          </div>
-        </header>
+          </header>
 
-        <section className="grid gap-6 lg:grid-cols-[1.45fr_0.9fr]">
-          <div className="space-y-6">
-            <div className="rounded-[2rem] border border-stone-900/10 bg-white/90 p-4 shadow-[0_22px_70px_rgba(73,53,28,0.08)] sm:p-6">
-              <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-stone-500">
-                    Risk map
-                  </p>
-                  <h2 className="text-2xl font-semibold tracking-[-0.03em]">
-                    Street-level risk overlay
-                  </h2>
-                </div>
-
-                <div className="inline-flex rounded-full border border-stone-900/10 bg-stone-100 p-1">
-                  {cities.map((city) => (
-                    <button
-                      key={city.id}
-                      type="button"
-                      onClick={() => {
-                        setActiveCityId(city.id);
-                        setSelectedSegmentId(city.segments[0]?.id ?? "");
-                      }}
-                      className={`rounded-full px-4 py-2 text-sm transition ${
-                        city.id === activeCity.id
-                          ? "bg-stone-950 text-white"
-                          : "text-stone-600 hover:text-stone-950"
-                      }`}
-                    >
-                      {city.shortLabel}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-                <MapPanel
-                  city={activeCity}
-                  selectedSegmentId={selectedSegment.id}
-                  onSelectSegment={setSelectedSegmentId}
-                />
-                <SegmentPanel segment={selectedSegment} cityLabel={activeCity.label} />
-              </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-3">
-              <SignalCard
-                title="How Nohook scores a road"
-                body="Each street segment blends recent review evidence, repeat category patterns, approved traveler reports, and a distance cap so one venue cannot dominate a district."
-              />
-              <SignalCard
-                title="Designed for first-time visitors"
-                body="The UI prioritizes color, short explanations, and immediate actions over dense map controls or lengthy review reading."
-              />
-              <SignalCard
-                title="Built for moderation"
-                body="Reports are stored as signals, not verdicts. Operators approve, reject, or hold submissions before they affect visible risk."
-              />
-            </div>
+          <div className="pointer-events-auto absolute left-4 top-[17.5rem] z-20 flex flex-wrap gap-2 sm:top-[16.25rem]">
+            {cities.map((city) => (
+              <button
+                key={city.id}
+                type="button"
+                onClick={() => {
+                  setActiveCityId(city.id);
+                  setSelectedSegmentId(city.segments[0]?.id ?? "");
+                }}
+                className={`rounded-full px-4 py-2 text-sm font-medium backdrop-blur-md transition ${
+                  city.id === activeCity.id
+                    ? "bg-white text-stone-950"
+                    : "border border-white/15 bg-black/35 text-white/82 hover:bg-black/55"
+                }`}
+              >
+                {city.shortLabel}
+              </button>
+            ))}
           </div>
 
-          <div className="space-y-6">
+          <aside className="pointer-events-auto absolute bottom-4 left-4 z-20 w-[min(100%,28rem)] rounded-[1.8rem] border border-white/12 bg-[rgba(7,11,16,0.78)] p-4 text-white shadow-[0_20px_70px_rgba(0,0,0,0.36)] backdrop-blur-xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-white/54">
+                  선택된 도로
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em]">
+                  {selectedSegment.name}
+                </h2>
+                <p className="mt-1 text-sm text-white/62">{activeCity.label}</p>
+              </div>
+              <span
+                className="rounded-full px-3 py-1 text-xs font-semibold text-white"
+                style={{ backgroundColor: riskPalette[selectedSegment.riskLevel] }}
+              >
+                {riskLabelMap[selectedSegment.riskLevel]}
+              </span>
+            </div>
+
+            <p className="mt-4 rounded-[1.2rem] border border-white/8 bg-white/6 p-4 text-sm leading-6 text-white/82">
+              {selectedSegment.summary}
+            </p>
+
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <MetricBox
+                label="여행자 신고"
+                value={selectedSegment.recentReportCount.toString()}
+              />
+              <MetricBox
+                label="이동 권고"
+                value={riskCopy[selectedSegment.riskLevel]}
+              />
+              <MetricBox
+                label="주요 유형"
+                value={
+                  categoryLabelMap[selectedSegment.topCategories[0]] ??
+                  selectedSegment.topCategories[0]
+                }
+              />
+              <MetricBox
+                label="주변 신호"
+                value={selectedSegment.placeSignals.length.toString()}
+              />
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {selectedSegment.topCategories.map((category) => (
+                <span
+                  key={category}
+                  className="rounded-full border border-white/10 bg-white/7 px-3 py-2 text-xs text-white/82"
+                >
+                  {categoryLabelMap[category] ?? category}
+                </span>
+              ))}
+            </div>
+          </aside>
+
+          <aside className="pointer-events-auto absolute bottom-4 right-4 z-20 hidden w-[25rem] rounded-[1.8rem] border border-white/12 bg-[rgba(7,11,16,0.78)] p-4 text-white shadow-[0_20px_70px_rgba(0,0,0,0.36)] backdrop-blur-xl xl:block">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-white/54">
+                  Quick report
+                </p>
+                <h2 className="mt-2 text-xl font-semibold tracking-[-0.04em]">
+                  현장 신고 보내기
+                </h2>
+              </div>
+              <Link
+                href="/admin"
+                className="rounded-full border border-white/14 bg-white/8 px-3 py-2 text-xs text-white/76 transition hover:bg-white/14"
+              >
+                운영 화면
+              </Link>
+            </div>
+
             <ReportPanel
               city={activeCity}
               selectedSegment={selectedSegment}
               reportState={reportState}
               onSubmit={handleSubmit}
+              compact
             />
+          </aside>
+        </div>
 
-            <aside className="rounded-[2rem] border border-stone-900/10 bg-[#103534] p-6 text-stone-50 shadow-[0_20px_70px_rgba(13,54,53,0.28)]">
-              <div className="space-y-4">
-                <p className="text-sm uppercase tracking-[0.18em] text-[#c6ece3]">
-                  Operations snapshot
-                </p>
-                <h2 className="text-2xl font-semibold tracking-[-0.03em]">
-                  Moderator queue is part of the MVP.
-                </h2>
-                <p className="text-sm leading-6 text-[#d6ede7]">
-                  Operator tools stay separate from the public traveler view,
-                  but the workflow is already modeled in this prototype.
-                </p>
-              </div>
-              <div className="mt-6 space-y-3">
-                <QueueRow label="Received today" value="18" />
-                <QueueRow label="Auto-clustered duplicates" value="5" />
-                <QueueRow label="Pending review" value="7" />
-              </div>
-              <Link
-                href="/admin"
-                className="mt-6 inline-flex rounded-full bg-[#f5d27f] px-4 py-2 text-sm font-medium text-stone-950 transition hover:bg-[#f7dfa4]"
-              >
-                Open admin review preview
-              </Link>
-            </aside>
-          </div>
+        <section className="mt-4 grid gap-4 xl:hidden">
+          <ReportPanel
+            city={activeCity}
+            selectedSegment={selectedSegment}
+            reportState={reportState}
+            onSubmit={handleSubmit}
+          />
         </section>
       </div>
     </main>
+  );
+}
+
+function Pill({ label, tone }: { label: string; tone: "dark" | "outline" }) {
+  return (
+    <span
+      className={`rounded-full px-3 py-2 ${
+        tone === "dark"
+          ? "bg-white/14 text-white"
+          : "border border-white/14 bg-transparent text-white/76"
+      }`}
+    >
+      {label}
+    </span>
   );
 }
 
@@ -274,282 +311,23 @@ function StatCard({
 }: {
   label: string;
   value: string;
-  tone: "sand" | "red" | "teal";
+  tone: "neutral" | "red" | "teal";
 }) {
   const toneClasses = {
-    sand: "bg-[#f5ebd8] text-stone-950",
-    red: "bg-[#cf3f2f] text-stone-50",
-    teal: "bg-[#103534] text-stone-50",
+    neutral: "bg-[rgba(255,255,255,0.13)] text-white",
+    red: "bg-[rgba(207,63,47,0.88)] text-white",
+    teal: "bg-[rgba(16,53,52,0.9)] text-white",
   };
 
   return (
-    <div className={`rounded-[1.5rem] p-4 ${toneClasses[tone]}`}>
-      <p className="text-xs uppercase tracking-[0.2em] opacity-80">{label}</p>
-      <p className="mt-3 text-3xl font-semibold tracking-[-0.04em]">{value}</p>
-    </div>
-  );
-}
-
-function SignalCard({ title, body }: { title: string; body: string }) {
-  return (
-    <article className="rounded-[1.75rem] border border-stone-900/10 bg-white/80 p-5 shadow-[0_12px_40px_rgba(82,62,35,0.06)]">
-      <h3 className="text-lg font-semibold tracking-[-0.03em]">{title}</h3>
-      <p className="mt-3 text-sm leading-6 text-stone-700">{body}</p>
-    </article>
-  );
-}
-
-function QueueRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
-      <span className="text-sm text-[#d6ede7]">{label}</span>
-      <span className="font-mono text-base">{value}</span>
-    </div>
-  );
-}
-
-function MapPanel({
-  city,
-  selectedSegmentId,
-  onSelectSegment,
-}: {
-  city: CityData;
-  selectedSegmentId: string;
-  onSelectSegment: (id: string) => void;
-}) {
-  return (
-    <div className="rounded-[1.75rem] border border-stone-900/10 bg-[#f4efe4] p-4">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.16em] text-stone-500">
-            {city.label}
-          </p>
-          <p className="text-sm text-stone-600">{city.subtitle}</p>
-        </div>
-        <div className="flex flex-wrap justify-end gap-2">
-          {(["Green", "Yellow", "Orange", "Red"] as RiskLevel[]).map((level) => (
-            <span
-              key={level}
-              className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs text-stone-700"
-            >
-              <span
-                className="h-2.5 w-2.5 rounded-full"
-                style={{ backgroundColor: riskPalette[level] }}
-              />
-              {level}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-[1.5rem] border border-stone-900/10 bg-[linear-gradient(180deg,#ebe2cf_0%,#f8f4ed_100%)]">
-        <svg
-          viewBox="0 0 620 420"
-          className="h-auto w-full"
-          role="img"
-          aria-label={`${city.label} street risk map`}
-        >
-          <defs>
-            <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
-              <path
-                d="M 36 0 L 0 0 0 36"
-                fill="none"
-                stroke="#ddd4c2"
-                strokeWidth="1"
-              />
-            </pattern>
-          </defs>
-          <rect width="620" height="420" fill="url(#grid)" />
-          {city.landmarks.map((landmark) => (
-            <g key={landmark.label}>
-              <circle cx={landmark.x} cy={landmark.y} r="6" fill="#103534" />
-              <text
-                x={landmark.x + 12}
-                y={landmark.y + 5}
-                fill="#27403d"
-                fontSize="13"
-                fontFamily="var(--font-mono)"
-              >
-                {landmark.label}
-              </text>
-            </g>
-          ))}
-          {city.segments.map((segment) => {
-            const isSelected = segment.id === selectedSegmentId;
-
-            return (
-              <g key={segment.id}>
-                <path
-                  d={segment.mapPath}
-                  fill="none"
-                  stroke={riskPalette[segment.riskLevel]}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={isSelected ? 24 : 18}
-                  opacity={isSelected ? 0.92 : 0.76}
-                  className="cursor-pointer transition"
-                  onClick={() => onSelectSegment(segment.id)}
-                />
-                <path
-                  d={segment.mapPath}
-                  fill="none"
-                  stroke={isSelected ? "#171717" : "rgba(23,23,23,0.15)"}
-                  strokeDasharray={isSelected ? "1 0" : "8 10"}
-                  strokeLinecap="round"
-                  strokeWidth={isSelected ? 2 : 1.4}
-                  pointerEvents="none"
-                />
-              </g>
-            );
-          })}
-        </svg>
-      </div>
-
-      <div className="mt-4 grid gap-3">
-        {city.segments.map((segment) => {
-          const isSelected = segment.id === selectedSegmentId;
-
-          return (
-            <button
-              key={segment.id}
-              type="button"
-              onClick={() => onSelectSegment(segment.id)}
-              className={`flex items-start justify-between gap-4 rounded-[1.35rem] border p-4 text-left transition ${
-                isSelected
-                  ? "border-stone-950 bg-white shadow-[0_10px_30px_rgba(74,57,35,0.08)]"
-                  : "border-stone-900/10 bg-white/70 hover:bg-white"
-              }`}
-            >
-              <div>
-                <p className="text-base font-semibold tracking-[-0.03em]">
-                  {segment.name}
-                </p>
-                <p className="mt-1 text-sm leading-6 text-stone-600">
-                  {segment.summary}
-                </p>
-              </div>
-              <div className="min-w-fit text-right">
-                <span
-                  className="inline-flex rounded-full px-3 py-1 text-xs font-medium text-white"
-                  style={{ backgroundColor: riskPalette[segment.riskLevel] }}
-                >
-                  {segment.riskLevel}
-                </span>
-                <p className="mt-2 text-xs uppercase tracking-[0.15em] text-stone-500">
-                  Score {segment.riskScore}
-                </p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function SegmentPanel({
-  segment,
-  cityLabel,
-}: {
-  segment: RoadSegment;
-  cityLabel: string;
-}) {
-  return (
-    <section className="rounded-[1.75rem] bg-stone-950 p-5 text-stone-50">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
-            {cityLabel}
-          </p>
-          <h3 className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-            {segment.name}
-          </h3>
-        </div>
-        <span
-          className="rounded-full px-3 py-1 text-xs font-medium text-white"
-          style={{ backgroundColor: riskPalette[segment.riskLevel] }}
-        >
-          {segment.riskLevel}
-        </span>
-      </div>
-
-      <p className="mt-4 rounded-[1.35rem] border border-white/8 bg-white/5 p-4 text-sm leading-6 text-stone-200">
-        {segment.summary}
+    <div
+      className={`rounded-[1.3rem] border border-white/10 px-4 py-3 shadow-[0_16px_40px_rgba(0,0,0,0.2)] backdrop-blur-md ${toneClasses[tone]}`}
+    >
+      <p className="text-[11px] uppercase tracking-[0.18em] text-white/72">
+        {label}
       </p>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <MetricBox
-          label="Traveler reports"
-          value={segment.recentReportCount.toString()}
-        />
-        <MetricBox label="Nearby signals" value={segment.placeSignals.length.toString()} />
-        <MetricBox label="Primary category" value={segment.topCategories[0]} />
-        <MetricBox label="Risk stance" value={riskCopy[segment.riskLevel]} />
-      </div>
-
-      <div className="mt-6 space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
-            Top categories
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {segment.topCategories.map((category) => (
-              <span
-                key={category}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-stone-200"
-              >
-                {category}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
-            Why this road is flagged
-          </p>
-          <ul className="mt-3 space-y-3">
-            {segment.reasons.map((reason) => (
-              <li
-                key={reason}
-                className="rounded-[1.15rem] border border-white/8 bg-white/5 px-4 py-3 text-sm leading-6 text-stone-200"
-              >
-                {reason}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-stone-400">
-            Nearby place signals
-          </p>
-          <div className="mt-3 space-y-3">
-            {segment.placeSignals.map((signal) => (
-              <div
-                key={signal.placeName}
-                className="rounded-[1.15rem] border border-white/8 bg-white/5 p-4"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-medium text-stone-100">{signal.placeName}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.15em] text-stone-400">
-                      {signal.signalType}
-                    </p>
-                  </div>
-                  <p className="font-mono text-sm text-[#f5d27f]">
-                    +{signal.signalScore}
-                  </p>
-                </div>
-                <p className="mt-3 text-sm leading-6 text-stone-200">
-                  {signal.evidence}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
+      <p className="mt-2 text-3xl font-semibold tracking-[-0.05em]">{value}</p>
+    </div>
   );
 }
 
@@ -567,6 +345,7 @@ function ReportPanel({
   selectedSegment,
   reportState,
   onSubmit,
+  compact = false,
 }: {
   city: CityData;
   selectedSegment: RoadSegment;
@@ -575,53 +354,52 @@ function ReportPanel({
     message: string;
   };
   onSubmit: (formData: FormData) => Promise<void>;
+  compact?: boolean;
 }) {
   return (
-    <section className="rounded-[2rem] border border-stone-900/10 bg-white/92 p-6 shadow-[0_20px_60px_rgba(75,57,31,0.08)]">
-      <div className="space-y-2">
-        <p className="text-sm uppercase tracking-[0.2em] text-stone-500">
-          Quick report
-        </p>
-        <h2 className="text-2xl font-semibold tracking-[-0.03em]">
-          Send a live street signal in under 30 seconds.
-        </h2>
-        <p className="text-sm leading-6 text-stone-700">
-          Reports are moderated before they affect public risk color. Default
-          mode is anonymous.
-        </p>
-      </div>
-
-      <form action={onSubmit} className="mt-6 space-y-4">
-        <input type="hidden" name="segmentId" value={selectedSegment.id} />
-        <div className="rounded-[1.4rem] border border-stone-900/10 bg-[#f7f3ec] p-4">
-          <p className="text-xs uppercase tracking-[0.15em] text-stone-500">
-            Auto-selected road
+    <section
+      className={
+        compact
+          ? "mt-4"
+          : "rounded-[2rem] border border-white/10 bg-[rgba(7,11,16,0.78)] p-5 text-white shadow-[0_20px_60px_rgba(0,0,0,0.28)]"
+      }
+    >
+      {!compact ? (
+        <div className="space-y-2">
+          <p className="text-sm uppercase tracking-[0.2em] text-white/52">
+            Quick report
           </p>
-          <p className="mt-2 text-base font-semibold text-stone-950">
+          <h2 className="text-2xl font-semibold tracking-[-0.03em]">
+            30초 안에 현장 신고 보내기
+          </h2>
+          <p className="text-sm leading-6 text-white/70">
+            신고는 공개 전에 운영 검수를 거칩니다. 기본 모드는 익명입니다.
+          </p>
+        </div>
+      ) : null}
+
+      <form action={onSubmit} className={`${compact ? "space-y-3" : "mt-5 space-y-4"}`}>
+        <input type="hidden" name="segmentId" value={selectedSegment.id} />
+        <div className="rounded-[1.4rem] border border-white/10 bg-white/6 p-4">
+          <p className="text-xs uppercase tracking-[0.15em] text-white/50">
+            선택된 도로
+          </p>
+          <p className="mt-2 text-base font-semibold text-white">
             {selectedSegment.name}
           </p>
-          <p className="mt-1 text-sm text-stone-600">{city.label}</p>
+          <p className="mt-1 text-sm text-white/62">{city.label}</p>
         </div>
 
         <label className="block space-y-2">
-          <span className="text-sm font-medium text-stone-800">Category</span>
+          <span className="text-sm font-medium text-white/82">신고 유형</span>
           <select
             name="category"
-            className="w-full rounded-2xl border border-stone-900/12 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-950"
+            className="w-full rounded-2xl border border-white/12 bg-white/8 px-4 py-3 text-sm text-white outline-none transition focus:border-white/40"
             defaultValue={selectedSegment.topCategories[0]}
           >
-            {[
-              "Taxi scam",
-              "Cyclo overcharge",
-              "Aggressive touting",
-              "Forced tip / photo pressure",
-              "Fake goods push",
-              "Verbal harassment",
-              "Sexual harassment",
-              "Other",
-            ].map((category) => (
-              <option key={category} value={category}>
-                {category}
+            {Object.entries(categoryLabelMap).map(([category, label]) => (
+              <option key={category} value={category} className="text-stone-950">
+                {label}
               </option>
             ))}
           </select>
@@ -629,40 +407,30 @@ function ReportPanel({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-stone-800">
-              Time bucket
-            </span>
+            <span className="text-sm font-medium text-white/82">발생 시간대</span>
             <select
               name="incidentTimeBucket"
-              className="w-full rounded-2xl border border-stone-900/12 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-950"
+              className="w-full rounded-2xl border border-white/12 bg-white/8 px-4 py-3 text-sm text-white outline-none transition focus:border-white/40"
               defaultValue="Evening"
             >
-              {["Morning", "Afternoon", "Evening", "Late night"].map((option) => (
-                <option key={option} value={option}>
-                  {option}
+              {Object.entries(timeBucketLabelMap).map(([value, label]) => (
+                <option key={value} value={value} className="text-stone-950">
+                  {label}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="block space-y-2">
-            <span className="text-sm font-medium text-stone-800">
-              Traveler type
-            </span>
+            <span className="text-sm font-medium text-white/82">여행 형태</span>
             <select
               name="travelerType"
-              className="w-full rounded-2xl border border-stone-900/12 bg-white px-4 py-3 text-sm text-stone-900 outline-none transition focus:border-stone-950"
+              className="w-full rounded-2xl border border-white/12 bg-white/8 px-4 py-3 text-sm text-white outline-none transition focus:border-white/40"
               defaultValue="Solo traveler"
             >
-              {[
-                "Solo traveler",
-                "Pair",
-                "Family",
-                "Group",
-                "Digital nomad",
-              ].map((option) => (
-                <option key={option} value={option}>
-                  {option}
+              {Object.entries(travelerTypeLabelMap).map(([value, label]) => (
+                <option key={value} value={value} className="text-stone-950">
+                  {label}
                 </option>
               ))}
             </select>
@@ -670,35 +438,33 @@ function ReportPanel({
         </div>
 
         <label className="block space-y-2">
-          <span className="text-sm font-medium text-stone-800">
-            What happened
+          <span className="text-sm font-medium text-white/82">
+            무슨 일이 있었나요
           </span>
           <textarea
             name="note"
-            rows={4}
-            placeholder="Example: Cyclo driver said 100k, demanded 500k at drop-off."
-            className="w-full rounded-[1.4rem] border border-stone-900/12 bg-white px-4 py-3 text-sm leading-6 text-stone-900 outline-none transition focus:border-stone-950"
+            rows={compact ? 3 : 4}
+            placeholder="예: 시클로 기사가 10만동이라고 했는데 도착 후 50만동을 요구했습니다."
+            className="w-full rounded-[1.4rem] border border-white/12 bg-white/8 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/36 focus:border-white/40"
           />
         </label>
 
         <button
           type="submit"
-          className="w-full rounded-full bg-stone-950 px-5 py-3 text-sm font-medium text-stone-50 transition hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-70"
+          className="w-full rounded-full bg-white px-5 py-3 text-sm font-semibold text-stone-950 transition hover:bg-stone-200 disabled:cursor-not-allowed disabled:opacity-70"
           disabled={reportState.status === "submitting"}
         >
-          {reportState.status === "submitting"
-            ? "Submitting..."
-            : "Submit anonymous report"}
+          {reportState.status === "submitting" ? "전송 중..." : "익명 신고 제출"}
         </button>
 
         {reportState.status !== "idle" ? (
           <p
             className={`rounded-2xl px-4 py-3 text-sm ${
               reportState.status === "success"
-                ? "bg-[#e3f3ee] text-[#0e4b3f]"
+                ? "bg-[#163d35] text-[#d4f1e6]"
                 : reportState.status === "error"
-                  ? "bg-[#fde8e5] text-[#952b1f]"
-                  : "bg-[#f5f0e5] text-stone-700"
+                  ? "bg-[#4c1f1a] text-[#ffd6cf]"
+                  : "bg-white/10 text-white/72"
             }`}
           >
             {reportState.message}

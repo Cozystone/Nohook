@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
   if (!isValidPayload(payload)) {
     return Response.json(
-      { ok: false, message: "Missing required report fields" },
+      { ok: false, message: "필수 신고 항목이 누락되었습니다." },
       { status: 400 },
     );
   }
@@ -26,14 +26,14 @@ export async function POST(request: Request) {
 
   if (!city || !segment) {
     return Response.json(
-      { ok: false, message: "Invalid city or segment" },
+      { ok: false, message: "도시 또는 도로 구간 정보가 올바르지 않습니다." },
       { status: 404 },
     );
   }
 
   const result: ReportSubmissionResult = {
     ok: true,
-    message: `Signal received for ${segment.name}. It is now queued for moderation in ${city.shortLabel}.`,
+    message: `${segment.name} 구간 신고가 접수되었습니다. 현재 ${city.shortLabel} 운영 검수 대기열에 등록되었습니다.`,
     moderationStatus: "under_review",
     reportReference: `nh-${Date.now().toString(36)}`,
   };
